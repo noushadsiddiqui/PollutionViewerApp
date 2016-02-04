@@ -63,7 +63,7 @@ public class MenuDisplayActivity extends BaseActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MenuDisplayActivity.this, DisplayStationOptionsActivity.class);
+                Intent intent = new Intent(MenuDisplayActivity.this, DisplayStatesOptionsActivity.class);
                 startActivityForResult(intent, PICK_STATION_REQUEST);
             }
         });

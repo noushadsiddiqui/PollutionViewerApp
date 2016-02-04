@@ -23,7 +23,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".DisplayStationOptionsActivity"
+            android:name=".DisplayStatesOptionsActivity"
             android:label="@string/states_text"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".StationDisplayActivity" />

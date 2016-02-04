@@ -23,7 +23,7 @@ import retrofit2.Response;
 /**
  * Created by User on 21-01-2016.
  */
-public class DisplayStationOptionsActivity extends BaseActivity {
+public class DisplayStatesOptionsActivity extends BaseActivity {
     private static final String TAG = "display_states_activity";
     private static final String TAG_ID = "stateId";
     private static final String TAG_NAME = "stateName";
@@ -92,7 +92,7 @@ public class DisplayStationOptionsActivity extends BaseActivity {
             @Override
             public void onFailure(Throwable t) {
                 hideProgressDialog();
-                Toast.makeText(DisplayStationOptionsActivity.this, "OOPS! Something went wrong", Toast.LENGTH_SHORT).show();
+                Toast.makeText(DisplayStatesOptionsActivity.this, "OOPS! Something went wrong", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -114,7 +114,7 @@ public class DisplayStationOptionsActivity extends BaseActivity {
                                 listDataHeader.get(groupPosition)).get(
                                 childPosition), Toast.LENGTH_SHORT)
                         .show();
-                Intent intent = new Intent(DisplayStationOptionsActivity.this, StationDisplayActivity.class);
+                Intent intent = new Intent(DisplayStatesOptionsActivity.this, StationDisplayActivity.class);
                 List<String> stations = listStationChild.get(listDataChild.get(
                         listDataHeader.get(groupPosition)).get(
                         childPosition));
