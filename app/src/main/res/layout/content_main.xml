@@ -9,12 +9,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.example.azuga.pollutionviewer.MenuDisplayActivity"
-    tools:showIn="@layout/app_bar_menu_display">
+    tools:context=".PollutionDetailActivity"
+    tools:showIn="@layout/detail_pollution">
 
-    <ListView
-        android:id="@+id/list_cities"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-    </ListView>
 </RelativeLayout>

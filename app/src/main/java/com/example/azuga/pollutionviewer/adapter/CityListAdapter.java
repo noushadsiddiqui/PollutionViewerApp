@@ -10,18 +10,18 @@ import android.widget.TextView;
 import com.example.azuga.pollutionviewer.R;
 
 import java.util.ArrayList;
-import java.util.zip.Inflater;
+import java.util.HashMap;
 
 /**
  * Created by User on 09-01-2016.
  */
 public class CityListAdapter extends BaseAdapter {
 
-    String[] myList;
+    ArrayList<HashMap<String, String>> myList;
     Context context;
     LayoutInflater inflater;
 
-    public CityListAdapter(Context context, String[] myList) {
+    public CityListAdapter(Context context, ArrayList<HashMap<String, String>> myList) {
         this.context = context;
         this.inflater = LayoutInflater.from(this.context);
         this.myList = myList;
@@ -29,12 +29,12 @@ public class CityListAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return myList.length;
+        return myList.size();
     }
 
     @Override
     public Object getItem(int position) {
-        return myList[position];
+        return myList.get(position);
     }
 
     @Override
@@ -46,22 +46,23 @@ public class CityListAdapter extends BaseAdapter {
     public View getView(int position, View view, ViewGroup viewGroup) {
         MyViewHolder myViewHolder;
         if (view == null) {
-            view = inflater.inflate(R.layout.list_item_city, viewGroup, false);
+            view = inflater.inflate(R.layout.list_cities, viewGroup, false);
             myViewHolder = new MyViewHolder(view);
             view.setTag(myViewHolder);
         } else {
             myViewHolder = (MyViewHolder) view.getTag();
         }
-        String cityName = myList[position];
-        myViewHolder.cityName.setText(cityName);
+        HashMap<String, String> stateMap = myList.get(position);
+        String stateName = stateMap.get(position);
+        myViewHolder.stateName.setText(stateName);
         return view;
     }
 
     private class MyViewHolder {
-        TextView cityName;
+        TextView stateName;
 
         public MyViewHolder(View item) {
-            cityName = (TextView) item.findViewById(R.id.text_cityName);
+            stateName = (TextView) item.findViewById(R.id.text_cityName);
         }
 
     }
