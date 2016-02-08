@@ -136,7 +136,16 @@ public class StationPollutionDetail implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-
+        parcel.writeString(pollutionLevel);
+        parcel.writeString(carbonMonoxide);
+        parcel.writeString(nitricOxide);
+        parcel.writeString(sulphurDioxide);
+        parcel.writeString(benzene);
+        parcel.writeString(toulene);
+        parcel.writeString(timestamp);
+        parcel.writeString(stateId);
+        parcel.writeString(cityId);
+        parcel.writeString(station);
     }
 
 }

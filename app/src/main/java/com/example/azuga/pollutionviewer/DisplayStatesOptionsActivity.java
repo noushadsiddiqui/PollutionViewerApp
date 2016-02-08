@@ -3,7 +3,9 @@ package com.example.azuga.pollutionviewer;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
@@ -38,12 +40,26 @@ public class DisplayStatesOptionsActivity extends BaseActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.list_states_names);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
         if (ApplicationUIUtils.isNetworkAvailable(this)) {
             showProgressBar(this, "Downloading Content...");
             callForStateList();
         } else {
             Toast.makeText(this, "OOPS! Check your internet connection", Toast.LENGTH_LONG).show();
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void callForStateList() {
@@ -55,19 +71,19 @@ public class DisplayStatesOptionsActivity extends BaseActivity {
                 hideProgressDialog();
                 if (response.isSuccess()) {
                     Log.i(TAG, "Response is not null");
-                    listDataHeader = new ArrayList<String>();
-                    listDataChild = new HashMap<String, List<String>>();
-                    listStationChild = new HashMap<String, List<String>>();
-                    List<String> list_cities = new ArrayList<String>();
-                    List<String> station_Names = new ArrayList<String>();
+                    listDataHeader = new ArrayList<>();
+                    listDataChild = new HashMap<>();
+                    listStationChild = new HashMap<>();
+                    List<String> list_cities = new ArrayList<>();
+                    List<String> station_Names = new ArrayList<>();
                     ArrayList<AllStation> list = response.body();
                     Iterator<AllStation> itr = list.iterator();
                     while (itr.hasNext()) {
                         AllStation stateFullList = itr.next();
                         if (!listDataHeader.contains(stateFullList.getStateName())) {
                             listDataHeader.add(stateFullList.getStateName());
-                            list_cities = new ArrayList<String>();
-                            station_Names = new ArrayList<String>();
+                            list_cities = new ArrayList<>();
+                            station_Names = new ArrayList<>();
                             list_cities.add(stateFullList.getCityName());
                             listDataChild.put(stateFullList.getStateName(), list_cities);
                         } else {
