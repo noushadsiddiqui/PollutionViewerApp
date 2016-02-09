@@ -40,12 +40,24 @@ public class ApplicationUIUtils {
     }
 
     public static void showAlertDialog(Context context, String title, String message,
-                                       Boolean status) {
+                                       Boolean twoButtons) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(title);
         builder.setMessage(message);
-        builder.setPositiveButton("OK", (DialogInterface.OnClickListener) context);
-        builder.setNeutralButton("Cancel", (DialogInterface.OnClickListener) context);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+        if(twoButtons) {
+            builder.setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    dialogInterface.dismiss();
+                }
+            });
+        }
         builder.create().show();
     }
 

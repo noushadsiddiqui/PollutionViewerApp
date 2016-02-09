@@ -5,7 +5,7 @@
     android:paddingBottom="18dp"
     android:paddingLeft="18dp"
     android:paddingRight="18dp"
-    android:paddingTop="50dp"
+    android:paddingTop="60dp"
     tools:context=".MenuDisplayActivity"
     tools:showIn="@layout/app_bar_menu_display">
 

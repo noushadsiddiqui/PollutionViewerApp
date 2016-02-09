@@ -26,12 +26,14 @@ import android.widget.Toast;
 import com.example.azuga.pollutionviewer.adapter.MyRecyclerViewAdapter;
 import com.example.azuga.pollutionviewer.utils.ApplicationUIUtils;
 import com.example.azuga.pollutionviewer.utils.DataObject;
+import com.example.azuga.pollutionviewer.utils.SessionManager;
 import com.example.azuga.pollutionviewer.utils.SwipeableRecyclerViewTouchListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.ExecutionException;
 
 import retrofit2.Call;
@@ -41,20 +43,24 @@ public class MenuDisplayActivity extends BaseActivity
 
     private static final String TAG = "userCurrentLocation";
     private static final int PICK_STATION_REQUEST = 0;
-    private static final ArrayList<DataObject> results = new ArrayList<DataObject>();
+    private final ArrayList<DataObject> results = new ArrayList<>();
     StationPollutionDetail pollutionData = null;
-    private static boolean isFromOnActivityResult = false;
     Location mLocation;
     LocationManager locManager = null;
     String mLatitude, mLongitude;
+    private HashMap<String, StationPollutionDetail> stationPollutionDetailHashMap = new HashMap<>();
+    private boolean isFromOnActivityResult = false;
     private GoogleApiClient mGoogleApiClient;
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
+    private SessionManager session;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        session = new SessionManager(this);
+        session.checkLogin();
         setContentView(R.layout.activity_menu_display);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -79,9 +85,16 @@ public class MenuDisplayActivity extends BaseActivity
         if (savedInstanceState != null) {
             return;
         }
+        HashMap<String, String> user = session.getUserDetails();
+        String userName = user.get(SessionManager.KEY_NAME);
+        if (userName != null && !userName.isEmpty()) {
+           /* View headerView = navigationView.inflateHeaderView(R.layout.nav_header_menu_display);
+            TextView navHeaderText = (TextView) headerView.findViewById(R.id.textView);
+            navHeaderText.setText("Welcome! " + userName);*/
+        }
         //calling method for getting user's latest location
         locManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        if (ApplicationUIUtils.displayNetworkStatus(locManager) || ApplicationUIUtils.displayGPSStatus(locManager)) {
+        if (ApplicationUIUtils.isNetworkAvailable(this) || ApplicationUIUtils.displayGPSStatus(locManager)) {
             buildGoogleApiClient(this);
             setRecyclerView();
 
@@ -151,21 +164,16 @@ public class MenuDisplayActivity extends BaseActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_display, menu);
+        menu.findItem(R.id.action_map).setVisible(false);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -196,13 +204,17 @@ public class MenuDisplayActivity extends BaseActivity
     @Override
     public void onStart() {
         super.onStart();
-        mGoogleApiClient.connect();
+        if (mGoogleApiClient != null) {
+            mGoogleApiClient.connect();
+        }
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        mGoogleApiClient.disconnect();
+        if (mGoogleApiClient != null) {
+            mGoogleApiClient.disconnect();
+        }
     }
 
     @Override
@@ -253,6 +265,9 @@ public class MenuDisplayActivity extends BaseActivity
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
+            if (!stationPollutionDetailHashMap.containsKey(stationName)) {
+                stationPollutionDetailHashMap.put(stationName, pollutionData);
+            }
             String text2 = "PM Value : " + pollutionData.getPollutionLevel();
             DataObject d = new DataObject(stationName, text2);
             int n = results.size();
@@ -269,16 +284,17 @@ public class MenuDisplayActivity extends BaseActivity
             results.remove(0);
         }
         super.onResume();
-        /*if(isFromOnActivityResult){
+        /*if (isFromOnActivityResult) {
+            isFromOnActivityResult = false;
             return;
         }*/
         ((MyRecyclerViewAdapter) mAdapter).setOnItemClickListener(new MyRecyclerViewAdapter
                 .MyClickListener() {
             @Override
             public void onItemClick(int position, View v) {
-                //Toast.makeText(MenuDisplayActivity.this, " Clicked on Item " + position, Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(MenuDisplayActivity.this, PollutionDetailActivity.class);
-                intent.putExtra("pollutionDetail", pollutionData);
+                String stationName = results.get(position).getmText1();
+                intent.putExtra("pollutionDetail", stationPollutionDetailHashMap.get(stationName));
                 startActivity(intent);
             }
         });

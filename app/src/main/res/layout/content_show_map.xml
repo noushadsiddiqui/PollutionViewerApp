@@ -4,25 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/chartLyt"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".PollutionDetailActivity"
-    tools:showIn="@layout/detail_pollution">
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/recycler_view_detail"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scrollbars="vertical" />
-
-    <TextView
-        android:id="@+id/pollution_detail_expanded"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/address"
-        android:layout_marginTop="10dp" />
+    tools:context="com.example.azuga.pollutionviewer.ShowMapActivity"
+    tools:showIn="@layout/activity_show_map">
 
 </RelativeLayout>

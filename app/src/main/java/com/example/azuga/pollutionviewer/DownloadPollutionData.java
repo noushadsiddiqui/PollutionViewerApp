@@ -29,13 +29,6 @@ public class DownloadPollutionData extends AsyncTask<Call, Void, StationPollutio
             Response<StationPollutionDetail> response = call.execute();
             if (response != null && response.isSuccess()) {
                 pollutionData = response.body();
-               /* pollutionData = "PM Value : " + data.getPollutionLevel()
-                        + " CarbonMonoxide -" + data.getCarbonMonoxide()
-                        + " Nitric Oxide -" + data.getNitricOxide()
-                        + " Sulphur Dioxide -" + data.getSulphurDioxide()
-                        + " Benzene -" + data.getBenzene()
-                        + " Toulene -" + data.getToulene()
-                        + "Last Current Time :" + data.getTimestamp();*/
             } else {
                 Log.i(TAG, "Call failed to get pollution Data");
             }
