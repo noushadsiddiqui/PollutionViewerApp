@@ -34,6 +34,9 @@ public class StationPollutionDetail implements Parcelable {
     private String benzene;
     @SerializedName("Toluene")
     private String toulene;
+    @SerializedName("EthylBenzene")
+    private String ethylBenzene;
+
 
     private StationPollutionDetail(Parcel in) {
         pollutionLevel = in.readString();
@@ -42,6 +45,7 @@ public class StationPollutionDetail implements Parcelable {
         sulphurDioxide = in.readString();
         benzene = in.readString();
         toulene = in.readString();
+        ethylBenzene = in.readString();
         timestamp = in.readString();
         stateId = in.readString();
         cityId = in.readString();
@@ -129,6 +133,14 @@ public class StationPollutionDetail implements Parcelable {
         this.toulene = toulene;
     }
 
+    public String getEthylBenzene() {
+        return ethylBenzene;
+    }
+
+    public void setEthylBenzene(String ethylBenzene) {
+        this.ethylBenzene = ethylBenzene;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -142,6 +154,7 @@ public class StationPollutionDetail implements Parcelable {
         parcel.writeString(sulphurDioxide);
         parcel.writeString(benzene);
         parcel.writeString(toulene);
+        parcel.writeString(ethylBenzene);
         parcel.writeString(timestamp);
         parcel.writeString(stateId);
         parcel.writeString(cityId);

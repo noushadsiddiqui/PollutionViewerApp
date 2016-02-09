@@ -27,8 +27,8 @@ import retrofit2.Response;
  */
 public class DisplayStatesOptionsActivity extends BaseActivity {
     private static final String TAG = "display_states_activity";
-    private static final String TAG_ID = "stateId";
-    private static final String TAG_NAME = "stateName";
+    private final String TAG_ID = "stateId";
+    private final String TAG_NAME = "stateName";
     private static final int PICK_STATION_REQUEST = 0;
     ExpandableListAdapter listAdapter;
     ExpandableListView states_List;

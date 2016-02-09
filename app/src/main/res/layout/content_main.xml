@@ -18,4 +18,11 @@
         android:layout_height="wrap_content"
         android:scrollbars="vertical" />
 
+    <TextView
+        android:id="@+id/pollution_detail_expanded"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/address"
+        android:layout_marginTop="10dp" />
+
 </RelativeLayout>
