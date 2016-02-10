@@ -1,12 +1,15 @@
 package com.example.azuga.pollutionviewer;
 
 import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -14,6 +17,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -43,6 +47,7 @@ public class MenuDisplayActivity extends BaseActivity
 
     private static final String TAG = "userCurrentLocation";
     private static final int PICK_STATION_REQUEST = 0;
+    private final int REQUEST_CODE_ASK_PERMISSIONS = 1;
     private final ArrayList<DataObject> results = new ArrayList<>();
     StationPollutionDetail pollutionData = null;
     Location mLocation;
@@ -219,27 +224,78 @@ public class MenuDisplayActivity extends BaseActivity
 
     @Override
     public void onConnected(Bundle bundle) {
+        createFirstCard();
+    }
+
+    private void createFirstCard() {
+
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            Log.i(TAG, "Permission not granted");
-            return;
-        } else {
-            mLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-            if (mLocation != null) {
-                mLatitude = String.valueOf(mLocation.getLatitude());
-                mLongitude = String.valueOf(mLocation.getLongitude());
+            if (Build.VERSION.SDK_INT >= 23) {
+                checkForPermissionGranted();
+            } else {
+                Log.i(TAG, "ACCESS_FINE_LOCATION Denied");
             }
-            String text1 = " Your current location is Latitude : " + mLatitude + " Longitude : " + mLongitude;
-            String text2 = "Pollution Data yet to find";
-            DataObject d = new DataObject(text1, text2);
-            ((MyRecyclerViewAdapter) mAdapter).addItem(d, 0);
-            mRecyclerView.swapAdapter(new MyRecyclerViewAdapter(results), false);
+            return;
+        }
+        mLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        if (mLocation != null) {
+            mLatitude = String.valueOf(mLocation.getLatitude());
+            mLongitude = String.valueOf(mLocation.getLongitude());
+        }
+        String text1 = " Your current location is Latitude : " + mLatitude + " Longitude : " + mLongitude;
+        String text2 = "Pollution Data yet to find";
+        DataObject d = new DataObject(text1, text2);
+        ((MyRecyclerViewAdapter) mAdapter).addItem(d, 0);
+        mRecyclerView.swapAdapter(new MyRecyclerViewAdapter(results), false);
+    }
+
+    @TargetApi(23)
+    private void checkForPermissionGranted() {
+        int hasAccessLocationPermission = checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION);
+        if (hasAccessLocationPermission != PackageManager.PERMISSION_GRANTED) {
+            if (!shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                showMessageOKCancel("You need to allow access to Contacts",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                        REQUEST_CODE_ASK_PERMISSIONS);
+                            }
+                        });
+                return;
+            }
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    REQUEST_CODE_ASK_PERMISSIONS);
+            return;
+        }
+        createFirstCard();
+    }
+
+    private void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener) {
+        new AlertDialog.Builder(MenuDisplayActivity.this)
+                .setMessage(message)
+                .setPositiveButton("OK", okListener)
+                .setNegativeButton("Cancel", null)
+                .create()
+                .show();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                           int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_CODE_ASK_PERMISSIONS:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission Granted
+                    createFirstCard();
+                } else {
+                    // Permission Denied
+                    Toast.makeText(MenuDisplayActivity.this, "ACCESS_FINE_LOCATION Denied", Toast.LENGTH_SHORT)
+                            .show();
+                }
+                break;
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
 
