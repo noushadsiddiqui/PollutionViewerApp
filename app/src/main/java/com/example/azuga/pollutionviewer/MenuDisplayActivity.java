@@ -254,7 +254,7 @@ public class MenuDisplayActivity extends BaseActivity
         int hasAccessLocationPermission = checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION);
         if (hasAccessLocationPermission != PackageManager.PERMISSION_GRANTED) {
             if (!shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                showMessageOKCancel("You need to allow access to Contacts",
+                showMessageOKCancel("You need to allow access to Location Data",
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
