@@ -16,12 +16,12 @@ import java.util.ArrayList;
 /**
  * Created by User on 02-02-2016.
  */
-public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.DataObjectHolder> {
+public class PollutionDetailRecylerViewAdapter extends RecyclerView.Adapter<PollutionDetailRecylerViewAdapter.DataObjectHolder> {
     private static String LOG_TAG = "MyRecyclerViewAdapter";
     private static MyClickListener myClickListener;
     private ArrayList<DataObject> mDataset;
 
-    public MyRecyclerViewAdapter(ArrayList<DataObject> myDataset) {
+    public PollutionDetailRecylerViewAdapter(ArrayList<DataObject> myDataset) {
         mDataset = myDataset;
     }
 
@@ -33,7 +33,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     public DataObjectHolder onCreateViewHolder(ViewGroup parent,
                                                int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.card_view_row, parent, false);
+                .inflate(R.layout.card_view_row_2, parent, false);
         DataObjectHolder dataObjectHolder = new DataObjectHolder(view);
         return dataObjectHolder;
     }
@@ -72,9 +72,9 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
 
         public DataObjectHolder(View itemView) {
             super(itemView);
-            card = (CardView) itemView.findViewById(R.id.card_view_1);
-            label = (TextView) itemView.findViewById(R.id.location_heading);
-            dateTime = (TextView) itemView.findViewById(R.id.address);
+            label = (TextView) itemView.findViewById(R.id.pollution_detail_heading);
+            dateTime = (TextView) itemView.findViewById(R.id.pollution_detail);
+            card = (CardView) itemView.findViewById(R.id.card_view_2);
             Log.i(LOG_TAG, "Adding Listener");
             itemView.setOnClickListener(this);
         }

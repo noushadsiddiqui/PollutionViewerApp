@@ -9,8 +9,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
-import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
@@ -27,8 +27,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.azuga.pollutionviewer.adapter.AddressResultReceiver;
 import com.example.azuga.pollutionviewer.adapter.MyRecyclerViewAdapter;
 import com.example.azuga.pollutionviewer.utils.ApplicationUIUtils;
+import com.example.azuga.pollutionviewer.utils.Constants;
 import com.example.azuga.pollutionviewer.utils.DataObject;
 import com.example.azuga.pollutionviewer.utils.SessionManager;
 import com.example.azuga.pollutionviewer.utils.SwipeableRecyclerViewTouchListener;
@@ -43,7 +45,7 @@ import java.util.concurrent.ExecutionException;
 import retrofit2.Call;
 
 public class MenuDisplayActivity extends BaseActivity
-        implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, AddressResultReceiver.Receiver {
 
     private static final String TAG = "userCurrentLocation";
     private static final int PICK_STATION_REQUEST = 0;
@@ -52,20 +54,20 @@ public class MenuDisplayActivity extends BaseActivity
     StationPollutionDetail pollutionData = null;
     Location mLocation;
     LocationManager locManager = null;
-    String mLatitude, mLongitude;
+    Double mLatitude, mLongitude;
     private HashMap<String, StationPollutionDetail> stationPollutionDetailHashMap = new HashMap<>();
-    private boolean isFromOnActivityResult = false;
     private GoogleApiClient mGoogleApiClient;
     private RecyclerView mRecyclerView;
-    private RecyclerView.Adapter mAdapter;
+    private MyRecyclerViewAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private SessionManager session;
+    private AddressResultReceiver mResultReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        session = new SessionManager(this);
-        session.checkLogin();
+//        session = new SessionManager(this);
+//        session.checkLogin();
         setContentView(R.layout.activity_menu_display);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -90,18 +92,11 @@ public class MenuDisplayActivity extends BaseActivity
         if (savedInstanceState != null) {
             return;
         }
-        HashMap<String, String> user = session.getUserDetails();
-        String userName = user.get(SessionManager.KEY_NAME);
-        if (userName != null && !userName.isEmpty()) {
-           /* View headerView = navigationView.inflateHeaderView(R.layout.nav_header_menu_display);
-            TextView navHeaderText = (TextView) headerView.findViewById(R.id.textView);
-            navHeaderText.setText("Welcome! " + userName);*/
-        }
-        //calling method for getting user's latest location
+
         locManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         if (ApplicationUIUtils.isNetworkAvailable(this) || ApplicationUIUtils.displayGPSStatus(locManager)) {
-            buildGoogleApiClient(this);
             setRecyclerView();
+            buildGoogleApiClient(this);
 
         } else {
             ApplicationUIUtils.showAlertDialog(this, "Internet Connection Error", "Sorry Not connected to Internet or gps", false);
@@ -114,7 +109,7 @@ public class MenuDisplayActivity extends BaseActivity
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setHasFixedSize(false);
         mAdapter = new MyRecyclerViewAdapter(results);
-        mRecyclerView.setAdapter(new MyRecyclerViewAdapter(null));
+        mRecyclerView.setAdapter(mAdapter);
         SwipeableRecyclerViewTouchListener swipeTouchListener =
                 new SwipeableRecyclerViewTouchListener(mRecyclerView,
                         new SwipeableRecyclerViewTouchListener.SwipeListener() {
@@ -138,6 +133,9 @@ public class MenuDisplayActivity extends BaseActivity
 
                             @Override
                             public boolean canSwipe(int position) {
+                                if (position == 0) {
+                                    return false;
+                                }
                                 return true;
                             }
                         });
@@ -152,6 +150,7 @@ public class MenuDisplayActivity extends BaseActivity
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
+        mGoogleApiClient.connect();
     }
 
 
@@ -167,7 +166,6 @@ public class MenuDisplayActivity extends BaseActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_display, menu);
         menu.findItem(R.id.action_map).setVisible(false);
         return true;
@@ -206,13 +204,6 @@ public class MenuDisplayActivity extends BaseActivity
         return true;
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        if (mGoogleApiClient != null) {
-            mGoogleApiClient.connect();
-        }
-    }
 
     @Override
     public void onStop() {
@@ -228,43 +219,42 @@ public class MenuDisplayActivity extends BaseActivity
     }
 
     private void createFirstCard() {
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            if (Build.VERSION.SDK_INT >= 23) {
-                checkForPermissionGranted();
-            } else {
-                Log.i(TAG, "ACCESS_FINE_LOCATION Denied");
-            }
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            checkForPermissionGranted();
             return;
         }
+
         mLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if (mLocation != null) {
-            mLatitude = String.valueOf(mLocation.getLatitude());
-            mLongitude = String.valueOf(mLocation.getLongitude());
+            mLatitude = mLocation.getLatitude();
+            mLongitude = mLocation.getLongitude();
+            if (mGoogleApiClient.isConnected() && mLocation != null) {
+                mResultReceiver = new AddressResultReceiver(new Handler());
+                mResultReceiver.setReceiver(this);
+                Intent intent = new Intent(MenuDisplayActivity.this, FetchAddressIntentService.class);
+                intent.putExtra(Constants.RECEIVER, mResultReceiver);
+                intent.putExtra(Constants.LOCATION_DATA_EXTRA, mLocation);
+                startService(intent);
+            }
         }
-        String text1 = " Your current location is Latitude : " + mLatitude + " Longitude : " + mLongitude;
-        String text2 = "Pollution Data yet to find";
-        DataObject d = new DataObject(text1, text2);
-        ((MyRecyclerViewAdapter) mAdapter).addItem(d, 0);
-        mRecyclerView.swapAdapter(new MyRecyclerViewAdapter(results), false);
     }
 
     @TargetApi(23)
     private void checkForPermissionGranted() {
-        int hasAccessLocationPermission = checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION);
+        int hasAccessLocationPermission = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
         if (hasAccessLocationPermission != PackageManager.PERMISSION_GRANTED) {
-            if (!shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
+            if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
                 showMessageOKCancel("You need to allow access to Location Data",
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                ActivityCompat.requestPermissions(MenuDisplayActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                                         REQUEST_CODE_ASK_PERMISSIONS);
                             }
                         });
                 return;
             }
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+            ActivityCompat.requestPermissions(MenuDisplayActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     REQUEST_CODE_ASK_PERMISSIONS);
             return;
         }
@@ -312,7 +302,6 @@ public class MenuDisplayActivity extends BaseActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent resultData) {
         if (resultCode == Activity.RESULT_OK && requestCode == PICK_STATION_REQUEST) {
-            Toast.makeText(this, "Your choosen station is : " + resultData, Toast.LENGTH_SHORT).show();
             String stationName = resultData.getStringExtra("stationName");
             APIService apiService = APIHelper.getApiService();
             Call<StationPollutionDetail> call = apiService.loadAllDetail(stationName);
@@ -324,40 +313,61 @@ public class MenuDisplayActivity extends BaseActivity
             if (!stationPollutionDetailHashMap.containsKey(stationName)) {
                 stationPollutionDetailHashMap.put(stationName, pollutionData);
             }
-            String text2 = "PM Value : " + pollutionData.getPollutionLevel();
-            DataObject d = new DataObject(stationName, text2);
-            int n = results.size();
-            Log.i(TAG, "no. of items in list are :" + n);
-            ((MyRecyclerViewAdapter) mAdapter).addItem(d, n);
+            String aqi = ApplicationUIUtils.roundUptoTwoDecimalUnits(pollutionData.getAqi());
+            String text2 = "AQI Value : " + aqi;
+            //get backGround Color of card according to AQI value
+            int color = ApplicationUIUtils.getCardBackgroundColor(MenuDisplayActivity.this, pollutionData.getAqi());
+            Log.i(TAG, "COLOR IS " + color);
+            DataObject d = new DataObject(stationName, text2, color);
+            results.add(d);
             mAdapter.notifyDataSetChanged();
-            isFromOnActivityResult = true;
         }
     }
 
     @Override
     protected void onResume() {
-        if (results.size() != 0) {
-            results.remove(0);
-        }
         super.onResume();
-        /*if (isFromOnActivityResult) {
-            isFromOnActivityResult = false;
-            return;
-        }*/
-        ((MyRecyclerViewAdapter) mAdapter).setOnItemClickListener(new MyRecyclerViewAdapter
-                .MyClickListener() {
-            @Override
-            public void onItemClick(int position, View v) {
-                Intent intent = new Intent(MenuDisplayActivity.this, PollutionDetailActivity.class);
-                String stationName = results.get(position).getmText1();
-                intent.putExtra("pollutionDetail", stationPollutionDetailHashMap.get(stationName));
-                startActivity(intent);
-            }
-        });
+        if (mResultReceiver != null) {
+            mResultReceiver.setReceiver(this);
+        }
+        if (mAdapter != null) {
+            mAdapter.setOnItemClickListener(new MyRecyclerViewAdapter
+                    .MyClickListener() {
+                @Override
+                public void onItemClick(int position, View v) {
+                    if (position != 0) {
+                        Intent intent = new Intent(MenuDisplayActivity.this, PollutionDetailActivity.class);
+                        String stationName = results.get(position).getmText1();
+                        intent.putExtra("pollutionDetail", stationPollutionDetailHashMap.get(stationName));
+                        startActivity(intent);
+                    }
+                }
+            });
+        }
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
+    protected void onPause() {
+        super.onPause();
+        mGoogleApiClient.disconnect();
+        if (mResultReceiver != null) {
+            mResultReceiver.setReceiver(null);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mResultReceiver != null) {
+            mResultReceiver.setReceiver(null);
+        }
+        mGoogleApiClient.disconnect();
+    }
+
+    @Override
+    public void onReceiveResult(int resultCode, Bundle resultData) {
+        DataObject d = new DataObject(" Your current location is :", resultData.getString(Constants.RESULT_DATA_KEY), ApplicationUIUtils.getCardBackgroundColor(MenuDisplayActivity.this, "40"));
+        results.add(d);
+        mAdapter.notifyDataSetChanged();
     }
 }
