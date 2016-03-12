@@ -12,4 +12,18 @@
     <string name="myPreferenceKey">com.example.azuga.pollutionviewer.UserPreferenceKey</string>
     <string name="show_graph">Show Graph</string>
     <string name="title_activity_show_map">ShowMapActivity</string>
+    <string name="service_not_available">Sorry! Service not Available</string>
+    <string name="invalid_lat_long_used">Invalid Lat/Lon used</string>
+    <string name="no_address_found">No Address Found</string>
+    <string name="address_found">Address Found</string>
+    <string name="no_geocoder_available">No Geocoder Found</string>
+
+    <!-- AQI Status -->
+    <string name="GOOD">GOOD</string>
+    <string name="SATISFACTORY">SATISFACTORY</string>
+    <string name="MODERATELY_POLLUTED">MODERATELY POLLUTED</string>
+    <string name="POOR">POOR</string>
+    <string name="VERY_POOR">VERY POOR</string>
+    <string name="SEVERE">SEVERE</string>
+
 </resources>

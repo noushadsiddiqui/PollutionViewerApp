@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.widget.RelativeLayout;
 
 import org.achartengine.ChartFactory;
@@ -24,10 +25,22 @@ public class ShowMapActivity extends AppCompatActivity {
         setContentView(R.layout.activity_show_map);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
         Intent intent = getIntent();
         StationPollutionDetail spd = intent.getParcelableExtra("pollutionDetailList");
         createBarChart(spd);
 
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void createBarChart(StationPollutionDetail spd) {
@@ -67,14 +80,13 @@ public class ShowMapActivity extends AppCompatActivity {
 
         XYMultipleSeriesRenderer mRenderer = new XYMultipleSeriesRenderer();
         mRenderer.addSeriesRenderer(renderer);
-        mRenderer.setMarginsColor(R.color.black); // transparent margins
+        mRenderer.setMarginsColor(Color.argb(0x00, 0xff, 0x00, 0x00)); // transparent margins
         // Disable Pan on two axis
         mRenderer.setPanEnabled(false, false);
         mRenderer.setZoomButtonsVisible(true);
         mRenderer.setYAxisMax(300);
         mRenderer.setYAxisMin(0);
         mRenderer.setBarSpacing(2);
-        mRenderer.setShowGrid(true); // we show the grid
 
         GraphicalView chartView = ChartFactory.getBarChartView(ShowMapActivity.this, dataset, mRenderer, BarChart.Type.DEFAULT);
 
