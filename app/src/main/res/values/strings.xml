@@ -11,7 +11,7 @@
     <string name="title_activity_main">Pollution Details</string>
     <string name="myPreferenceKey">com.example.azuga.pollutionviewer.UserPreferenceKey</string>
     <string name="show_graph">Show Graph</string>
-    <string name="title_activity_show_map">ShowMapActivity</string>
+    <string name="title_activity_show_map">Bar Graph</string>
     <string name="service_not_available">Sorry! Service not Available</string>
     <string name="invalid_lat_long_used">Invalid Lat/Lon used</string>
     <string name="no_address_found">No Address Found</string>
@@ -25,5 +25,13 @@
     <string name="POOR">POOR</string>
     <string name="VERY_POOR">VERY POOR</string>
     <string name="SEVERE">SEVERE</string>
+
+    <!-- AQI Health Text -->
+    <string name="GOOD_text">Minimal impact</string>
+    <string name="SATISFACTORY_text">May cause minor breathing discomfort to sensitive people</string>
+    <string name="MODERATELY_POLLUTED_text">May cause breathing discomfort to people with lung disease such as asthma, and discomfort to people with heart disease, children and older adults.</string>
+    <string name="POOR_text">May cause breathing discomfort to people on prolonged exposure, and discomfort to people with heart disease.</string>
+    <string name="VERY_POOR_text">May cause respiratory illness to the people on prolonged exposure. Effect may be more pronounced in people with lung and heart diseases.</string>
+    <string name="SEVERE_text">May cause respiratory impact even on healthy people, and serious health impacts on people with lung/heart disease. The health impacts may be experienced even during light physical activity.</string>
 
 </resources>

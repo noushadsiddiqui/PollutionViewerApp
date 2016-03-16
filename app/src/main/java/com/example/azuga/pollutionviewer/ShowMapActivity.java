@@ -2,22 +2,27 @@ package com.example.azuga.pollutionviewer;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.RelativeLayout;
 
+import com.example.azuga.pollutionviewer.utils.ApplicationUIUtils;
+
 import org.achartengine.ChartFactory;
 import org.achartengine.GraphicalView;
 import org.achartengine.chart.BarChart;
-import org.achartengine.chart.PointStyle;
 import org.achartengine.model.XYMultipleSeriesDataset;
 import org.achartengine.model.XYSeries;
 import org.achartengine.renderer.XYMultipleSeriesRenderer;
 import org.achartengine.renderer.XYSeriesRenderer;
 
 public class ShowMapActivity extends AppCompatActivity {
+    private XYMultipleSeriesDataset mDataset = new XYMultipleSeriesDataset();
+    private XYMultipleSeriesRenderer mRenderer = new XYMultipleSeriesRenderer();
+    private GraphicalView mChartView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,51 +49,128 @@ public class ShowMapActivity extends AppCompatActivity {
     }
 
     private void createBarChart(StationPollutionDetail spd) {
-        XYSeries series = new XYSeries("Pollutant AQI last 24 hour");
         int hour = 0;
-        if (spd.getCarbonMonoxide() != null) {
-            series.add(hour++, Double.parseDouble(spd.getCarbonMonoxide()));
+        String[] mLabel = new String[8];
+        if (spd.getPm10AQI() != null) {
+            XYSeries series = new XYSeries("PM10 AQI");
+            mLabel[hour] = "PM10";
+            series.add(hour++, ApplicationUIUtils.roundedAQI(spd.getPm10AQI()));
+            mDataset.addSeries(series);
+            XYSeriesRenderer renderer = new XYSeriesRenderer();
+            renderer.setLineWidth(2);
+            renderer.setColor(ApplicationUIUtils.getCardBackgroundColor(this, spd.getPm10AQI()));
+            renderer.setFillPoints(true);
+            renderer.setDisplayChartValues(true);
+            renderer.setChartValuesTextSize(30);
+            mRenderer.addSeriesRenderer(renderer);
         }
-        if (spd.getNitricOxide() != null) {
-            series.add(hour++, Double.parseDouble(spd.getNitricOxide()));
+        if (spd.getPm25AQI() != null) {
+            XYSeries series = new XYSeries("PM25 AQI");
+            mLabel[hour] = "PM25";
+            series.add(hour++, ApplicationUIUtils.roundedAQI(spd.getPm25AQI()));
+            mDataset.addSeries(series);
+            XYSeriesRenderer renderer = new XYSeriesRenderer();
+            renderer.setLineWidth(2);
+            renderer.setColor(ApplicationUIUtils.getCardBackgroundColor(this, spd.getPm25AQI()));
+            renderer.setDisplayChartValues(true);
+            renderer.setChartValuesTextSize(30);
+            renderer.setFillPoints(true);
+            mRenderer.addSeriesRenderer(renderer);
         }
-        if (spd.getSulphurDioxide() != null) {
-            series.add(hour++, Double.parseDouble(spd.getSulphurDioxide()));
+        if (spd.getNitrogenDioxideAQI() != null) {
+            XYSeries series = new XYSeries("NitrogenDioxide AQI");
+            mLabel[hour] = "NO2";
+            series.add(hour++, ApplicationUIUtils.roundedAQI(spd.getNitrogenDioxideAQI()));
+            mDataset.addSeries(series);
+            XYSeriesRenderer renderer = new XYSeriesRenderer();
+            renderer.setLineWidth(2);
+            renderer.setColor(ApplicationUIUtils.getCardBackgroundColor(this, spd.getNitrogenDioxideAQI()));
+            renderer.setDisplayChartValues(true);
+            renderer.setChartValuesTextSize(30);
+            renderer.setFillPoints(true);
+            mRenderer.addSeriesRenderer(renderer);
         }
-        if (spd.getBenzene() != null) {
-            series.add(hour++, Double.parseDouble(spd.getBenzene()));
+        if (spd.getOzoneAQI() != null) {
+            XYSeries series = new XYSeries("Ozone AQI");
+            mLabel[hour] = "03";
+            series.add(hour++, ApplicationUIUtils.roundedAQI(spd.getOzoneAQI()));
+            mDataset.addSeries(series);
+            XYSeriesRenderer renderer = new XYSeriesRenderer();
+            renderer.setLineWidth(2);
+            renderer.setColor(ApplicationUIUtils.getCardBackgroundColor(this, spd.getOzoneAQI()));
+            renderer.setDisplayChartValues(true);
+            renderer.setChartValuesTextSize(30);
+            renderer.setFillPoints(true);
+            mRenderer.addSeriesRenderer(renderer);
         }
-        if (spd.getToulene() != null) {
-            series.add(hour++, Double.parseDouble(spd.getToulene()));
+        if (spd.getCarbonMonoxideAQI() != null) {
+            XYSeries series = new XYSeries("CarbonMonoxide AQI");
+            mLabel[hour] = "CO";
+            series.add(hour++, ApplicationUIUtils.roundedAQI(spd.getCarbonMonoxideAQI()));
+            mDataset.addSeries(series);
+            XYSeriesRenderer renderer = new XYSeriesRenderer();
+            renderer.setLineWidth(2);
+            renderer.setColor(ApplicationUIUtils.getCardBackgroundColor(this, spd.getCarbonMonoxideAQI()));
+            // Include low and max value
+            renderer.setDisplayChartValues(true);
+            renderer.setChartValuesTextSize(30);
+            renderer.setFillPoints(true);
+            mRenderer.addSeriesRenderer(renderer);
         }
-        if (spd.getEthylBenzene() != null) {
-            series.add(hour++, Double.parseDouble(spd.getEthylBenzene()));
+        if (spd.getSulfurDioxideAQI() != null) {
+            XYSeries series = new XYSeries("SulfurDioxide AQI");
+            mLabel[hour] = "SO2";
+            series.add(hour++, ApplicationUIUtils.roundedAQI(spd.getSulfurDioxideAQI()));
+            mDataset.addSeries(series);
+            XYSeriesRenderer renderer = new XYSeriesRenderer();
+            renderer.setLineWidth(2);
+            renderer.setColor(ApplicationUIUtils.getCardBackgroundColor(this, spd.getSulfurDioxideAQI()));
+            renderer.setDisplayChartValues(true);
+            renderer.setChartValuesTextSize(30);
+            renderer.setFillPoints(true);
+            mRenderer.addSeriesRenderer(renderer);
         }
-
-
-        XYMultipleSeriesDataset dataset = new XYMultipleSeriesDataset();
-        dataset.addSeries(series);
-
-        XYSeriesRenderer renderer = new XYSeriesRenderer();
-        renderer.setLineWidth(2);
-        renderer.setColor(Color.RED);
-        // Include low and max value
-        renderer.setDisplayBoundingPoints(true);
-        // we add point markers
-        renderer.setPointStyle(PointStyle.CIRCLE);
-        renderer.setPointStrokeWidth(3);
-
-        XYMultipleSeriesRenderer mRenderer = new XYMultipleSeriesRenderer();
-        mRenderer.addSeriesRenderer(renderer);
+        if (spd.getAmmoniaAQI() != null) {
+            XYSeries series = new XYSeries("Ammonia AQI");
+            mLabel[hour] = "NH3";
+            series.add(hour++, ApplicationUIUtils.roundedAQI(spd.getAmmoniaAQI()));
+            mDataset.addSeries(series);
+            XYSeriesRenderer renderer = new XYSeriesRenderer();
+            renderer.setLineWidth(2);
+            renderer.setColor(ApplicationUIUtils.getCardBackgroundColor(this, spd.getAmmoniaAQI()));
+            renderer.setDisplayChartValues(true);
+            renderer.setChartValuesTextSize(30);
+            renderer.setFillPoints(true);
+            mRenderer.addSeriesRenderer(renderer);
+        }
         mRenderer.setMarginsColor(Color.argb(0x00, 0xff, 0x00, 0x00)); // transparent margins
         // Disable Pan on two axis
-        mRenderer.setPanEnabled(false, false);
-        mRenderer.setZoomButtonsVisible(true);
-        mRenderer.setYAxisMax(300);
+        mRenderer.setPanEnabled(true, false);
+        mRenderer.setZoomEnabled(false, false);
+        mRenderer.setExternalZoomEnabled(false);
         mRenderer.setYAxisMin(0);
-        mRenderer.setBarSpacing(2);
-
-        GraphicalView chartView = ChartFactory.getBarChartView(ShowMapActivity.this, dataset, mRenderer, BarChart.Type.DEFAULT);
+        mRenderer.setYAxisMax(500);
+        mRenderer.setYLabels(6);
+        mRenderer.setYLabelsAlign(Paint.Align.RIGHT);
+        mRenderer.setXLabels(0);
+        mRenderer.setXAxisMin(-3.3);
+        mRenderer.setXAxisMax(8);
+        mRenderer.setYLabelsAlign(Paint.Align.RIGHT);
+        //mRenderer.setXTitle("Pollutants");
+        mRenderer.setYTitle("AQI Values");
+        mRenderer.setShowGridY(false);
+        mRenderer.setShowGridX(false);
+        mRenderer.setFitLegend(true);
+        mRenderer.setBarWidth(50);
+        mRenderer.setAxisTitleTextSize(20);
+        mRenderer.setChartTitleTextSize(20);
+        mRenderer.setLabelsTextSize(20);
+        mRenderer.setLegendTextSize(20);
+        //commenting because not required : May be in future
+        /*for (int i = 0; i < hour; i++) {
+            mRenderer.addXTextLabel(i, mLabel[i]);
+        }*/
+        GraphicalView chartView = ChartFactory.getBarChartView(ShowMapActivity.this, mDataset, mRenderer, BarChart.Type.DEFAULT);
 
         RelativeLayout chartLyt = (RelativeLayout) findViewById(R.id.chartLyt);
         chartLyt.addView(chartView, 0);

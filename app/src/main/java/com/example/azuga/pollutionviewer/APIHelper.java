@@ -15,7 +15,7 @@ public class APIHelper {
     public static APIService getApiService() {
         if (sApiService == null) {
             Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl("your url here")
+                    .baseUrl("http://ec2-52-26-104-86.us-west-2.compute.amazonaws.com:8090/")
                     .addConverterFactory(GsonConverterFactory.create()).build();
             sApiService = retrofit.create(APIService.class);
         }

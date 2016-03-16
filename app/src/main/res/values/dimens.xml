@@ -11,5 +11,6 @@
     <dimen name="text_margin">16dp</dimen>
     <dimen name="card_min_height">100dp</dimen>
     <dimen name="card_max_height">120dp</dimen>
-    <dimen name="textsize">6sp</dimen>
+    <dimen name="textsize">12dp</dimen>
+    <dimen name="textsize_rows">8dp</dimen>
 </resources>

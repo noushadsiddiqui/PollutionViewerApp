@@ -10,10 +10,11 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.Handler;
+import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -30,7 +31,6 @@ import android.widget.Toast;
 import com.example.azuga.pollutionviewer.adapter.AddressResultReceiver;
 import com.example.azuga.pollutionviewer.adapter.MyRecyclerViewAdapter;
 import com.example.azuga.pollutionviewer.utils.ApplicationUIUtils;
-import com.example.azuga.pollutionviewer.utils.Constants;
 import com.example.azuga.pollutionviewer.utils.DataObject;
 import com.example.azuga.pollutionviewer.utils.SessionManager;
 import com.example.azuga.pollutionviewer.utils.SwipeableRecyclerViewTouchListener;
@@ -40,12 +40,15 @@ import com.google.android.gms.location.LocationServices;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import retrofit2.Call;
 
 public class MenuDisplayActivity extends BaseActivity
-        implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, AddressResultReceiver.Receiver {
+        implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener/*, AddressResultReceiver.Receiver*/ {
 
     private static final String TAG = "userCurrentLocation";
     private static final int PICK_STATION_REQUEST = 0;
@@ -55,6 +58,7 @@ public class MenuDisplayActivity extends BaseActivity
     Location mLocation;
     LocationManager locManager = null;
     Double mLatitude, mLongitude;
+    private HashSet<String> selectedStations;
     private HashMap<String, StationPollutionDetail> stationPollutionDetailHashMap = new HashMap<>();
     private GoogleApiClient mGoogleApiClient;
     private RecyclerView mRecyclerView;
@@ -62,12 +66,13 @@ public class MenuDisplayActivity extends BaseActivity
     private RecyclerView.LayoutManager mLayoutManager;
     private SessionManager session;
     private AddressResultReceiver mResultReceiver;
+    private AllStation nearestStation;
+    private TokenResponse token_response;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        session = new SessionManager(this);
-//        session.checkLogin();
+        session = new SessionManager(this);
         setContentView(R.layout.activity_menu_display);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -89,17 +94,13 @@ public class MenuDisplayActivity extends BaseActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        if (savedInstanceState != null) {
-            return;
-        }
-
         locManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        if (ApplicationUIUtils.isNetworkAvailable(this) || ApplicationUIUtils.displayGPSStatus(locManager)) {
+        if (ApplicationUIUtils.isNetworkAvailable(this)) {
+            showProgressBar(this, "Downloading Content.....");
             setRecyclerView();
             buildGoogleApiClient(this);
-
         } else {
-            ApplicationUIUtils.showAlertDialog(this, "Internet Connection Error", "Sorry Not connected to Internet or gps", false);
+            ApplicationUIUtils.showAlertDialog(this, "Internet Connection Error", "Sorry Not connected to Internet", false);
         }
     }
 
@@ -116,8 +117,10 @@ public class MenuDisplayActivity extends BaseActivity
                             @Override
                             public void onDismissedBySwipeLeft(RecyclerView recyclerView, int[] reverseSortedPositions) {
                                 for (int position : reverseSortedPositions) {
+                                    DataObject d = results.get(position);
                                     results.remove(position);
                                     mAdapter.notifyItemRemoved(position);
+                                    session.getStationsList().remove(d.getmText1());
                                 }
                                 mAdapter.notifyDataSetChanged();
                             }
@@ -125,8 +128,10 @@ public class MenuDisplayActivity extends BaseActivity
                             @Override
                             public void onDismissedBySwipeRight(RecyclerView recyclerView, int[] reverseSortedPositions) {
                                 for (int position : reverseSortedPositions) {
+                                    DataObject d = results.get(position);
                                     results.remove(position);
                                     mAdapter.notifyItemRemoved(position);
+                                    session.getStationsList().remove(d.getmText1());
                                 }
                                 mAdapter.notifyDataSetChanged();
                             }
@@ -168,6 +173,7 @@ public class MenuDisplayActivity extends BaseActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_display, menu);
         menu.findItem(R.id.action_map).setVisible(false);
+        menu.findItem(R.id.action_settings).setVisible(false);
         return true;
     }
 
@@ -186,15 +192,7 @@ public class MenuDisplayActivity extends BaseActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
+        if (id == R.id.nav_share) {
 
         } else if (id == R.id.nav_send) {
 
@@ -211,10 +209,30 @@ public class MenuDisplayActivity extends BaseActivity
         if (mGoogleApiClient != null) {
             mGoogleApiClient.disconnect();
         }
+        if (selectedStations != null) {
+            session.setSessionStateList(selectedStations);
+        }
     }
 
     @Override
     public void onConnected(Bundle bundle) {
+        if (session.getToken().isEmpty()) {
+            APIService apiService = APIHelper.getApiService();
+            String android_id = Settings.Secure.getString(this.getContentResolver(),
+                    Settings.Secure.ANDROID_ID);
+            Call<TokenResponse> tokenResponse = apiService.authenticateUser(android_id);
+            try {
+                token_response = new GetUserToken().execute(tokenResponse).get();
+                if (token_response != null && token_response.isSuccess()) {
+                    String token = token_response.getToken();
+                    Log.i(TAG, "token is " + token);
+                    session.setSessionToken(token);
+                }
+                //TODO: check for refresh token
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
         createFirstCard();
     }
 
@@ -223,18 +241,42 @@ public class MenuDisplayActivity extends BaseActivity
             checkForPermissionGranted();
             return;
         }
-
         mLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if (mLocation != null) {
             mLatitude = mLocation.getLatitude();
             mLongitude = mLocation.getLongitude();
-            if (mGoogleApiClient.isConnected() && mLocation != null) {
+            /*if (mGoogleApiClient.isConnected() && mLocation != null) {
                 mResultReceiver = new AddressResultReceiver(new Handler());
                 mResultReceiver.setReceiver(this);
                 Intent intent = new Intent(MenuDisplayActivity.this, FetchAddressIntentService.class);
                 intent.putExtra(Constants.RECEIVER, mResultReceiver);
                 intent.putExtra(Constants.LOCATION_DATA_EXTRA, mLocation);
                 startService(intent);
+            }*/
+            //calling API to get nearest station area
+            if (mLatitude != null && mLongitude != null) {
+                APIService apiService = APIHelper.getApiService();
+                Call<AllStation> nearestStationCall = apiService.findNearestStation(mLatitude, mLongitude);
+                try {
+                    nearestStation = new GetNearestStation().execute(nearestStationCall).get();
+                    if (nearestStation != null && !session.getToken().isEmpty()) {
+                        callForPollutionData(nearestStation.getStationName(), true);
+                    } else {
+                        callForPollutionData("Sorry No Nearest Area Found", true);
+                    }
+                } catch (InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                }
+                if (session.getStationsList() != null && !session.getStationsList().isEmpty() && !session.getToken().isEmpty()) {
+                    Log.i(TAG, "Token is" + session.getToken());
+                    Set<String> user_station = session.getStationsList();
+                    Iterator<String> itr = user_station.iterator();
+                    while (itr.hasNext()) {
+                        String stationName = itr.next();
+                        callForPollutionData(stationName, false);
+                    }
+                }
+                hideProgressDialog();
             }
         }
     }
@@ -258,7 +300,7 @@ public class MenuDisplayActivity extends BaseActivity
                     REQUEST_CODE_ASK_PERMISSIONS);
             return;
         }
-        createFirstCard();
+        //createFirstCard();
     }
 
     private void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener) {
@@ -303,44 +345,42 @@ public class MenuDisplayActivity extends BaseActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent resultData) {
         if (resultCode == Activity.RESULT_OK && requestCode == PICK_STATION_REQUEST) {
             String stationName = resultData.getStringExtra("stationName");
-            APIService apiService = APIHelper.getApiService();
-            Call<StationPollutionDetail> call = apiService.loadAllDetail(stationName);
-            try {
-                pollutionData = new DownloadPollutionData().execute(call).get();
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-            }
-            if (!stationPollutionDetailHashMap.containsKey(stationName)) {
-                stationPollutionDetailHashMap.put(stationName, pollutionData);
-            }
-            String aqi = ApplicationUIUtils.roundUptoTwoDecimalUnits(pollutionData.getAqi());
-            String text2 = "AQI Value : " + aqi;
-            //get backGround Color of card according to AQI value
-            int color = ApplicationUIUtils.getCardBackgroundColor(MenuDisplayActivity.this, pollutionData.getAqi());
-            Log.i(TAG, "COLOR IS " + color);
-            DataObject d = new DataObject(stationName, text2, color);
-            results.add(d);
+            callForPollutionData(stationName, false);
             mAdapter.notifyDataSetChanged();
+            selectedStations = session.getStationsList();
+            selectedStations.add(stationName);
         }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (mResultReceiver != null) {
-            mResultReceiver.setReceiver(this);
+        if (mGoogleApiClient == null) {
+            if (ApplicationUIUtils.isNetworkAvailable(this)) {
+                buildGoogleApiClient(MenuDisplayActivity.this);
+                mGoogleApiClient.connect();
+            } else {
+                ApplicationUIUtils.showAlertDialog(this, "Internet Connection Error", "Sorry Not connected to Internet", false);
+            }
         }
+       /* if (mResultReceiver != null) {
+            mResultReceiver.setReceiver(this);
+        }*/
         if (mAdapter != null) {
             mAdapter.setOnItemClickListener(new MyRecyclerViewAdapter
                     .MyClickListener() {
+                String stationName;
+
                 @Override
                 public void onItemClick(int position, View v) {
                     if (position != 0) {
-                        Intent intent = new Intent(MenuDisplayActivity.this, PollutionDetailActivity.class);
-                        String stationName = results.get(position).getmText1();
-                        intent.putExtra("pollutionDetail", stationPollutionDetailHashMap.get(stationName));
-                        startActivity(intent);
+                        stationName = results.get(position).getmText1();
+                    } else {
+                        stationName = nearestStation.getStationName();
                     }
+                    Intent intent = new Intent(MenuDisplayActivity.this, PollutionDetailActivity.class);
+                    intent.putExtra("pollutionDetail", stationPollutionDetailHashMap.get(stationName));
+                    startActivity(intent);
                 }
             });
         }
@@ -353,6 +393,9 @@ public class MenuDisplayActivity extends BaseActivity
         if (mResultReceiver != null) {
             mResultReceiver.setReceiver(null);
         }
+        if (selectedStations != null) {
+            session.setSessionStateList(selectedStations);
+        }
     }
 
     @Override
@@ -361,12 +404,49 @@ public class MenuDisplayActivity extends BaseActivity
         if (mResultReceiver != null) {
             mResultReceiver.setReceiver(null);
         }
+        if (selectedStations != null) {
+            session.setSessionStateList(selectedStations);
+        }
         mGoogleApiClient.disconnect();
     }
 
-    @Override
+    /*@Override
     public void onReceiveResult(int resultCode, Bundle resultData) {
-        DataObject d = new DataObject(" Your current location is :", resultData.getString(Constants.RESULT_DATA_KEY), ApplicationUIUtils.getCardBackgroundColor(MenuDisplayActivity.this, "40"));
+        DataObject d = new DataObject(" Your current location is :", resultData.getString(Constants.RESULT_DATA_KEY), ApplicationUIUtils.getPollutionStatus(MenuDisplayActivity.this, "50"), ApplicationUIUtils.getCardBackgroundColor(MenuDisplayActivity.this, "40"));
+        results.add(d);
+        if (session.getStationsList() != null && !session.getStationsList().isEmpty() && !session.getToken().isEmpty()) {
+            Set<String> user_station = session.getStationsList();
+            Iterator<String> itr = user_station.iterator();
+            while (itr.hasNext()) {
+                String stationName = itr.next();
+                callForPollutionData(stationName);
+            }
+        }
+        mAdapter.notifyDataSetChanged();
+    }*/
+
+    private void callForPollutionData(String stationName, boolean firstCard) {
+        DataObject d;
+        if (!stationName.equals("Sorry No Nearest Area Found")) {
+            APIService apiService = APIHelper.getApiService();
+            Call<StationPollutionDetail> call = apiService.loadAllDetail(stationName, session.getToken());
+            try {
+                pollutionData = new DownloadPollutionData().execute(call).get();
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+            if (!stationPollutionDetailHashMap.containsKey(stationName)) {
+                stationPollutionDetailHashMap.put(stationName, pollutionData);
+            }
+            String aqi = String.valueOf(ApplicationUIUtils.roundedAQI(pollutionData.getAqi()));
+            String text2 = "AQI : " + aqi;
+            //get backGround Color of card according to AQI value
+            int color = ApplicationUIUtils.getCardBackgroundColor(MenuDisplayActivity.this, pollutionData.getAqi());
+            String text3 = ApplicationUIUtils.getPollutionStatus(MenuDisplayActivity.this, pollutionData.getAqi());
+            d = new DataObject(firstCard ? "Your Nearest Area is : " + stationName : stationName, text2, text3, color);
+        } else {
+            d = new DataObject(stationName, "", "", ContextCompat.getColor(MenuDisplayActivity.this, R.color.blue));
+        }
         results.add(d);
         mAdapter.notifyDataSetChanged();
     }

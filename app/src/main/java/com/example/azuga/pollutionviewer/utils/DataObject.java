@@ -6,11 +6,13 @@ package com.example.azuga.pollutionviewer.utils;
 public class DataObject {
     private String mText1;
     private String mText2;
+    private String mText3;
     private int mColor;
 
-    public DataObject(String text1, String text2, int color) {
+    public DataObject(String text1, String text2, String text3, int color) {
         mText1 = text1;
         mText2 = text2;
+        mText3 = text3;
         mColor = color;
     }
 
@@ -36,5 +38,13 @@ public class DataObject {
 
     public void setmColor(int mColor) {
         this.mColor = mColor;
+    }
+
+    public String getmText3() {
+        return mText3;
+    }
+
+    public void setmText3(String mText3) {
+        this.mText3 = mText3;
     }
 }

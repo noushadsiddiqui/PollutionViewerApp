@@ -17,10 +17,131 @@
             android:background="?attr/colorPrimary"
             android:elevation="4dp"
             android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+            app:layout_scrollFlags="scroll|enterAlways"
             app:popupTheme="@style/AppTheme.PopupOverlay" />
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_main" />
+    <android.support.v4.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <!-- <android.support.v7.widget.RecyclerView
+                 android:id="@+id/recycler_view_detail"
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+                 android:scrollbars="vertical" />-->
+            <TextView
+                android:id="@+id/pollution_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="10dp"
+                android:textSize="20dp"
+                android:textStyle="bold" />
+
+            <pl.pawelkleczkowski.customgauge.CustomGauge
+                android:id="@+id/gauge"
+                android:layout_width="250dp"
+                android:layout_height="250dp"
+                android:layout_below="@+id/pollution_status"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:layout_marginTop="20dp"
+                android:paddingBottom="20dp"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:paddingTop="20dp"
+                app:endValue="500"
+                app:pointEndColor="@color/blue"
+                app:pointStartColor="@color/blue"
+                app:startAngel="180"
+                app:startValue="0"
+                app:strokeCap="BUTT"
+                app:strokeColor="@color/white"
+                app:strokeWidth="28dp"
+                app:sweepAngel="180" />
+
+            <TextView
+                android:id="@+id/gaugeValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/gauge"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="90dp"
+                android:text="0"
+                android:textSize="20dp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/aqi_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/gauge"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="70dp"
+                android:text="0"
+                android:textSize="20dp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/aqi_text_desc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/gauge"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="56dp"
+                android:text="(AIR QUALITY INDEX)"
+                android:textSize="15dp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/aqi_min"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/gauge"
+                android:layout_alignLeft="@+id/gauge"
+                android:layout_marginBottom="70dp"
+                android:text="0"
+                android:textSize="15dp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/aqi_max"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/gauge"
+                android:layout_alignRight="@+id/gauge"
+                android:layout_marginBottom="70dp"
+                android:text="500"
+                android:textSize="15dp"
+                android:textStyle="bold" />
+
+            <TableLayout
+                android:id="@+id/table_main"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/aqi_text"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="50dp" />
+
+            <TextView
+                android:id="@+id/aqi_health"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_below="@+id/table_main" />
+
+
+        </RelativeLayout>
+    </android.support.v4.widget.NestedScrollView>
+
 
 </android.support.design.widget.CoordinatorLayout>

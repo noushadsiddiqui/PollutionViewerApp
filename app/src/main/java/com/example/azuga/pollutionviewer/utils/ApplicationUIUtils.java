@@ -112,4 +112,140 @@ public class ApplicationUIUtils {
             return context.getString(R.string.SEVERE);
         }
     }
+
+    public static String getPollutionText(Context context, String aqi) {
+        int roundedAQI = roundedAQI(aqi);
+        if (isBetween(roundedAQI, 0, 50)) {
+            return context.getString(R.string.GOOD_text);
+        } else if (isBetween(roundedAQI, 51, 100)) {
+            return context.getString(R.string.SATISFACTORY_text);
+        } else if (isBetween(roundedAQI, 101, 200)) {
+            return context.getString(R.string.MODERATELY_POLLUTED_text);
+        } else if (isBetween(roundedAQI, 201, 300)) {
+            return context.getString(R.string.POOR_text);
+        } else if (isBetween(roundedAQI, 301, 400)) {
+            return context.getString(R.string.VERY_POOR_text);
+        } else {
+            return context.getString(R.string.SEVERE_text);
+        }
+    }
+
+    public static int getPM10Color(Context context, String value) {
+        int roundedAQI = roundedAQI(value);
+        if (isBetween(roundedAQI, 0, 50)) {
+            return ContextCompat.getColor(context, R.color.colorDarkGreen);
+        } else if (isBetween(roundedAQI, 51, 100)) {
+            return ContextCompat.getColor(context, R.color.colorLightGreen);
+        } else if (isBetween(roundedAQI, 101, 250)) {
+            return ContextCompat.getColor(context, R.color.colorYellow);
+        } else if (isBetween(roundedAQI, 251, 350)) {
+            return ContextCompat.getColor(context, R.color.colorOrange);
+        } else if (isBetween(roundedAQI, 351, 430)) {
+            return ContextCompat.getColor(context, R.color.colorRed);
+        } else {
+            return ContextCompat.getColor(context, R.color.colorBrown);
+        }
+    }
+
+    public static int getPM25Color(Context context, String value) {
+        int roundedAQI = roundedAQI(value);
+        if (isBetween(roundedAQI, 0, 30)) {
+            return ContextCompat.getColor(context, R.color.colorDarkGreen);
+        } else if (isBetween(roundedAQI, 31, 60)) {
+            return ContextCompat.getColor(context, R.color.colorLightGreen);
+        } else if (isBetween(roundedAQI, 61, 90)) {
+            return ContextCompat.getColor(context, R.color.colorYellow);
+        } else if (isBetween(roundedAQI, 91, 120)) {
+            return ContextCompat.getColor(context, R.color.colorOrange);
+        } else if (isBetween(roundedAQI, 121, 250)) {
+            return ContextCompat.getColor(context, R.color.colorRed);
+        } else {
+            return ContextCompat.getColor(context, R.color.colorBrown);
+        }
+    }
+
+    public static int getNitrogenDioxideColor(Context context, String value) {
+        int roundedAQI = roundedAQI(value);
+        if (isBetween(roundedAQI, 0, 40)) {
+            return ContextCompat.getColor(context, R.color.colorDarkGreen);
+        } else if (isBetween(roundedAQI, 41, 80)) {
+            return ContextCompat.getColor(context, R.color.colorLightGreen);
+        } else if (isBetween(roundedAQI, 81, 180)) {
+            return ContextCompat.getColor(context, R.color.colorYellow);
+        } else if (isBetween(roundedAQI, 181, 280)) {
+            return ContextCompat.getColor(context, R.color.colorOrange);
+        } else if (isBetween(roundedAQI, 281, 400)) {
+            return ContextCompat.getColor(context, R.color.colorRed);
+        } else {
+            return ContextCompat.getColor(context, R.color.colorBrown);
+        }
+    }
+
+    public static int getO3Color(Context context, String value) {
+        int roundedAQI = roundedAQI(value);
+        if (isBetween(roundedAQI, 0, 50)) {
+            return ContextCompat.getColor(context, R.color.colorDarkGreen);
+        } else if (isBetween(roundedAQI, 51, 100)) {
+            return ContextCompat.getColor(context, R.color.colorLightGreen);
+        } else if (isBetween(roundedAQI, 101, 168)) {
+            return ContextCompat.getColor(context, R.color.colorYellow);
+        } else if (isBetween(roundedAQI, 169, 208)) {
+            return ContextCompat.getColor(context, R.color.colorOrange);
+        } else if (isBetween(roundedAQI, 209, 748)) {
+            return ContextCompat.getColor(context, R.color.colorRed);
+        } else {
+            return ContextCompat.getColor(context, R.color.colorBrown);
+        }
+    }
+
+    public static int getCOColor(Context context, String value) {
+        int roundedAQI = roundedAQI(value);
+        if (isBetween(roundedAQI, 0, 1)) {
+            return ContextCompat.getColor(context, R.color.colorDarkGreen);
+        } else if (isBetween(roundedAQI, 1, 2)) {
+            return ContextCompat.getColor(context, R.color.colorLightGreen);
+        } else if (isBetween(roundedAQI, 2, 10)) {
+            return ContextCompat.getColor(context, R.color.colorYellow);
+        } else if (isBetween(roundedAQI, 10, 17)) {
+            return ContextCompat.getColor(context, R.color.colorOrange);
+        } else if (isBetween(roundedAQI, 17, 34)) {
+            return ContextCompat.getColor(context, R.color.colorRed);
+        } else {
+            return ContextCompat.getColor(context, R.color.colorBrown);
+        }
+    }
+
+    public static int getSO2Color(Context context, String value) {
+        int roundedAQI = roundedAQI(value);
+        if (isBetween(roundedAQI, 0, 40)) {
+            return ContextCompat.getColor(context, R.color.colorDarkGreen);
+        } else if (isBetween(roundedAQI, 41, 80)) {
+            return ContextCompat.getColor(context, R.color.colorLightGreen);
+        } else if (isBetween(roundedAQI, 81, 380)) {
+            return ContextCompat.getColor(context, R.color.colorYellow);
+        } else if (isBetween(roundedAQI, 381, 800)) {
+            return ContextCompat.getColor(context, R.color.colorOrange);
+        } else if (isBetween(roundedAQI, 801, 1600)) {
+            return ContextCompat.getColor(context, R.color.colorRed);
+        } else {
+            return ContextCompat.getColor(context, R.color.colorBrown);
+        }
+    }
+
+    public static int getNH3Color(Context context, String value) {
+        int roundedAQI = roundedAQI(value);
+        if (isBetween(roundedAQI, 0, 200)) {
+            return ContextCompat.getColor(context, R.color.colorDarkGreen);
+        } else if (isBetween(roundedAQI, 201, 400)) {
+            return ContextCompat.getColor(context, R.color.colorLightGreen);
+        } else if (isBetween(roundedAQI, 401, 800)) {
+            return ContextCompat.getColor(context, R.color.colorYellow);
+        } else if (isBetween(roundedAQI, 801, 1200)) {
+            return ContextCompat.getColor(context, R.color.colorOrange);
+        } else if (isBetween(roundedAQI, 1200, 1800)) {
+            return ContextCompat.getColor(context, R.color.colorRed);
+        } else {
+            return ContextCompat.getColor(context, R.color.colorBrown);
+        }
+    }
 }

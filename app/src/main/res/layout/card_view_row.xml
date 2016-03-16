@@ -21,18 +21,30 @@
             android:layout_height="match_parent">
 
             <TextView
-                android:id="@+id/location_heading"
+                android:id="@+id/station_heading"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/address"
+                android:id="@+id/pollutionBoard"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/location_heading"
+                android:layout_below="@+id/station_heading"
+                android:layout_marginTop="10dp"
+                android:background="@color/black" />
+
+            <TextView
+                android:id="@+id/AQI_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@+id/pollutionBoard"
+                android:layout_alignParentRight="true"
+                android:layout_below="@+id/station_heading"
                 android:layout_marginTop="10dp" />
+
+
         </RelativeLayout>
 
     </android.support.v7.widget.CardView>

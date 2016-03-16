@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import com.example.azuga.pollutionviewer.adapter.ExpandableListAdapter;
 import com.example.azuga.pollutionviewer.utils.ApplicationUIUtils;
+import com.example.azuga.pollutionviewer.utils.SessionManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,11 +36,13 @@ public class DisplayStatesOptionsActivity extends BaseActivity {
     List<String> listDataHeader;
     HashMap<String, List<String>> listDataChild;
     HashMap<String, List<String>> listStationChild;
+    private SessionManager session;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.list_states_names);
+        session = new SessionManager(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -64,7 +67,7 @@ public class DisplayStatesOptionsActivity extends BaseActivity {
 
     private void callForStateList() {
         APIService apiService = APIHelper.getApiService();
-        Call<ArrayList<AllStation>> call = apiService.loadAllStates();
+        Call<ArrayList<AllStation>> call = apiService.loadAllStates(session.getToken());
         call.enqueue(new Callback<ArrayList<AllStation>>() {
             @Override
             public void onResponse(Response<ArrayList<AllStation>> response) {
