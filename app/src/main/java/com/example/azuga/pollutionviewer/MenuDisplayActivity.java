@@ -260,9 +260,9 @@ public class MenuDisplayActivity extends BaseActivity
                 try {
                     nearestStation = new GetNearestStation().execute(nearestStationCall).get();
                     if (nearestStation != null && !session.getToken().isEmpty()) {
-                        callForPollutionData(nearestStation.getStationName(), true);
+                        callForPollutionData(nearestStation.getStationName(), nearestStation.getFullStationName(), true);
                     } else {
-                        callForPollutionData("Sorry No Nearest Area Found", true);
+                        callForPollutionData("Sorry No Nearest Area Found", "", true);
                     }
                 } catch (InterruptedException | ExecutionException e) {
                     e.printStackTrace();
@@ -273,7 +273,7 @@ public class MenuDisplayActivity extends BaseActivity
                     Iterator<String> itr = user_station.iterator();
                     while (itr.hasNext()) {
                         String stationName = itr.next();
-                        callForPollutionData(stationName, false);
+                        callForPollutionData(stationName, "", false);
                     }
                 }
                 hideProgressDialog();
@@ -345,7 +345,7 @@ public class MenuDisplayActivity extends BaseActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent resultData) {
         if (resultCode == Activity.RESULT_OK && requestCode == PICK_STATION_REQUEST) {
             String stationName = resultData.getStringExtra("stationName");
-            callForPollutionData(stationName, false);
+            callForPollutionData(stationName, "", false);
             mAdapter.notifyDataSetChanged();
             selectedStations = session.getStationsList();
             selectedStations.add(stationName);
@@ -425,7 +425,7 @@ public class MenuDisplayActivity extends BaseActivity
         mAdapter.notifyDataSetChanged();
     }*/
 
-    private void callForPollutionData(String stationName, boolean firstCard) {
+    private void callForPollutionData(String stationName, String stationFullName, boolean firstCard) {
         DataObject d;
         if (!stationName.equals("Sorry No Nearest Area Found")) {
             APIService apiService = APIHelper.getApiService();
@@ -443,7 +443,7 @@ public class MenuDisplayActivity extends BaseActivity
             //get backGround Color of card according to AQI value
             int color = ApplicationUIUtils.getCardBackgroundColor(MenuDisplayActivity.this, pollutionData.getAqi());
             String text3 = ApplicationUIUtils.getPollutionStatus(MenuDisplayActivity.this, pollutionData.getAqi());
-            d = new DataObject(firstCard ? "Your Nearest Area is : " + stationName : stationName, text2, text3, color);
+            d = new DataObject(firstCard ? "Your Nearest Area is : " + stationFullName : stationName, text2, text3, color);
         } else {
             d = new DataObject(stationName, "", "", ContextCompat.getColor(MenuDisplayActivity.this, R.color.blue));
         }
