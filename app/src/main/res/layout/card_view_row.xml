@@ -33,6 +33,8 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/station_heading"
                 android:layout_marginTop="10dp"
+                android:paddingLeft="4dp"
+                android:paddingRight="4dp"
                 android:background="@color/black" />
 
             <TextView

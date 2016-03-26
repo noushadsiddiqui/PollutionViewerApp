@@ -47,4 +47,12 @@ public class DataObject {
     public void setmText3(String mText3) {
         this.mText3 = mText3;
     }
+
+    public String getContent(int count) {
+        return count == 1 ? count + ") " + mText1 + "," + "\n" +
+                mText2 + "," + "\n" +
+                "Pollution status = " + mText3 + "\n" : count + ") " + "Area : " + mText1 + "," + "\n" +
+                mText2 + "," + "\n" +
+                "Pollution status = " + mText3 + "\n";
+    }
 }

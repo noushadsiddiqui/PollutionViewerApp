@@ -11,7 +11,7 @@
     <string name="title_activity_main">Pollution Details</string>
     <string name="myPreferenceKey">com.example.azuga.pollutionviewer.UserPreferenceKey</string>
     <string name="show_graph">Show Graph</string>
-    <string name="title_activity_show_map">Bar Graph</string>
+    <string name="title_activity_show_map">Pollutant AQI Statistics</string>
     <string name="service_not_available">Sorry! Service not Available</string>
     <string name="invalid_lat_long_used">Invalid Lat/Lon used</string>
     <string name="no_address_found">No Address Found</string>

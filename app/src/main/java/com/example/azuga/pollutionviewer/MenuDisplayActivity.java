@@ -193,9 +193,19 @@ public class MenuDisplayActivity extends BaseActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+            Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+            sharingIntent.setType("text/plain");
+            StringBuilder sb = new StringBuilder();
+            Iterator<DataObject> itr = results.iterator();
+            int count = 1;
+            while (itr.hasNext()) {
+                DataObject d = itr.next();
+                sb.append(d.getContent(count++));
+            }
+            String shareBody = sb.toString();
+            sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "Subject Here");
+            sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
+            startActivity(Intent.createChooser(sharingIntent, "Share via"));
         }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -239,12 +249,11 @@ public class MenuDisplayActivity extends BaseActivity
     private void createFirstCard() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             checkForPermissionGranted();
-            return;
-        }
-        mLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        if (mLocation != null) {
-            mLatitude = mLocation.getLatitude();
-            mLongitude = mLocation.getLongitude();
+        } else {
+            mLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            if (mLocation != null) {
+                mLatitude = mLocation.getLatitude();
+                mLongitude = mLocation.getLongitude();
             /*if (mGoogleApiClient.isConnected() && mLocation != null) {
                 mResultReceiver = new AddressResultReceiver(new Handler());
                 mResultReceiver.setReceiver(this);
@@ -253,30 +262,31 @@ public class MenuDisplayActivity extends BaseActivity
                 intent.putExtra(Constants.LOCATION_DATA_EXTRA, mLocation);
                 startService(intent);
             }*/
-            //calling API to get nearest station area
-            if (mLatitude != null && mLongitude != null) {
-                APIService apiService = APIHelper.getApiService();
-                Call<AllStation> nearestStationCall = apiService.findNearestStation(mLatitude, mLongitude);
-                try {
-                    nearestStation = new GetNearestStation().execute(nearestStationCall).get();
-                    if (nearestStation != null && !session.getToken().isEmpty()) {
-                        callForPollutionData(nearestStation.getStationName(), nearestStation.getFullStationName(), true);
-                    } else {
-                        callForPollutionData("Sorry No Nearest Area Found", "", true);
+                //calling API to get nearest station area
+                if (mLatitude != null && mLongitude != null) {
+                    APIService apiService = APIHelper.getApiService();
+                    Call<AllStation> nearestStationCall = apiService.findNearestStation(mLatitude, mLongitude);
+                    try {
+                        nearestStation = new GetNearestStation().execute(nearestStationCall).get();
+                        if (nearestStation != null && !session.getToken().isEmpty()) {
+                            callForPollutionData(nearestStation.getStationName(), nearestStation.getFullStationName(), true);
+                        } else {
+                            callForPollutionData("Sorry No Nearest Area Found", "", true);
+                        }
+                    } catch (InterruptedException | ExecutionException e) {
+                        e.printStackTrace();
                     }
-                } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
-                }
-                if (session.getStationsList() != null && !session.getStationsList().isEmpty() && !session.getToken().isEmpty()) {
-                    Log.i(TAG, "Token is" + session.getToken());
-                    Set<String> user_station = session.getStationsList();
-                    Iterator<String> itr = user_station.iterator();
-                    while (itr.hasNext()) {
-                        String stationName = itr.next();
-                        callForPollutionData(stationName, "", false);
+                    if (session.getStationsList() != null && !session.getStationsList().isEmpty() && !session.getToken().isEmpty()) {
+                        Log.i(TAG, "Token is" + session.getToken());
+                        Set<String> user_station = session.getStationsList();
+                        Iterator<String> itr = user_station.iterator();
+                        while (itr.hasNext()) {
+                            String stationName = itr.next();
+                            callForPollutionData(stationName, "", false);
+                        }
                     }
+                    hideProgressDialog();
                 }
-                hideProgressDialog();
             }
         }
     }

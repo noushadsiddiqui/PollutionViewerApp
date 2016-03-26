@@ -14,8 +14,10 @@ import android.widget.Toast;
 import com.example.azuga.pollutionviewer.utils.ApplicationUIUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class StationDisplayActivity extends BaseActivity {
+    private HashMap<String, String> station_names_map;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +29,7 @@ public class StationDisplayActivity extends BaseActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
         ArrayList<String> stations = getIntent().getStringArrayListExtra("stations");
+        station_names_map = (HashMap<String, String>) getIntent().getSerializableExtra("station_names_map");
         if (!stations.isEmpty() && ApplicationUIUtils.isNetworkAvailable(this)) {
             showProgressBar(this, "Downloading Content...");
             setCityListView(stations);
@@ -46,7 +49,7 @@ public class StationDisplayActivity extends BaseActivity {
 
     private void setCityListView(ArrayList<String> stations) {
         ListView lstCities = (ListView) findViewById(R.id.list_stations);
-        ListAdapter adapter = new ArrayAdapter<String>(this, R.layout.list_station_items, R.id.station_id, stations);
+        ListAdapter adapter = new ArrayAdapter<>(this, R.layout.list_station_items, R.id.station_id, stations);
         hideProgressDialog();
         lstCities.setAdapter(adapter);
         lstCities.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -55,6 +58,7 @@ public class StationDisplayActivity extends BaseActivity {
                 Intent intent = new Intent(StationDisplayActivity.this, MenuDisplayActivity.class);
                 String stationName = (String) parent.getItemAtPosition(position);
                 intent.putExtra("stationName", stationName);
+                intent.putExtra("stationFullName", station_names_map.get(stationName));
                 setResult(RESULT_OK, intent);
                 finish();
             }

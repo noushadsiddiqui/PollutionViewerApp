@@ -28,14 +28,15 @@ import retrofit2.Response;
  */
 public class DisplayStatesOptionsActivity extends BaseActivity {
     private static final String TAG = "display_states_activity";
+    private static final int PICK_STATION_REQUEST = 0;
     private final String TAG_ID = "stateId";
     private final String TAG_NAME = "stateName";
-    private static final int PICK_STATION_REQUEST = 0;
     ExpandableListAdapter listAdapter;
     ExpandableListView states_List;
     List<String> listDataHeader;
     HashMap<String, List<String>> listDataChild;
     HashMap<String, List<String>> listStationChild;
+    HashMap<String, String> station_names_map;
     private SessionManager session;
 
     @Override
@@ -77,6 +78,7 @@ public class DisplayStatesOptionsActivity extends BaseActivity {
                     listDataHeader = new ArrayList<>();
                     listDataChild = new HashMap<>();
                     listStationChild = new HashMap<>();
+                    station_names_map = new HashMap<>();
                     List<String> list_cities = new ArrayList<>();
                     List<String> station_Names = new ArrayList<>();
                     ArrayList<AllStation> list = response.body();
@@ -94,14 +96,16 @@ public class DisplayStatesOptionsActivity extends BaseActivity {
                         }
                         if (!list_cities.contains(stateFullList.getCityName())) {
                             list_cities.add(stateFullList.getCityName());
-                            station_Names = new ArrayList<String>();
+                            station_Names = new ArrayList<>();
                             station_Names.add(stateFullList.getStationName());
+                            station_names_map.put(stateFullList.getStationName(), stateFullList.getFullStationName());
                             listStationChild.put(stateFullList.getCityName(), station_Names);
                         } else {
                             listStationChild.put(stateFullList.getCityName(), station_Names);
                         }
                         if (!station_Names.contains(stateFullList.getStationName())) {
                             station_Names.add(stateFullList.getStationName());
+                            station_names_map.put(stateFullList.getStationName(), stateFullList.getFullStationName());
                         }
                     }
                     setUpStateList(listDataHeader, listDataChild, listStationChild);
@@ -125,19 +129,20 @@ public class DisplayStatesOptionsActivity extends BaseActivity {
         states_List.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
             @Override
             public boolean onChildClick(ExpandableListView parent, View view, int groupPosition, int childPosition, long id) {
-                Toast.makeText(
+                /*Toast.makeText(
                         getApplicationContext(),
                         listDataHeader.get(groupPosition)
                                 + " : "
                                 + listDataChild.get(
                                 listDataHeader.get(groupPosition)).get(
                                 childPosition), Toast.LENGTH_SHORT)
-                        .show();
+                        .show();*/
                 Intent intent = new Intent(DisplayStatesOptionsActivity.this, StationDisplayActivity.class);
                 List<String> stations = listStationChild.get(listDataChild.get(
                         listDataHeader.get(groupPosition)).get(
                         childPosition));
                 intent.putStringArrayListExtra("stations", (ArrayList<String>) stations);
+                intent.putExtra("station_names_map", station_names_map);
                 startActivityForResult(intent, PICK_STATION_REQUEST);
                 return false;
             }
@@ -149,6 +154,7 @@ public class DisplayStatesOptionsActivity extends BaseActivity {
         if (resultCode == Activity.RESULT_OK && requestCode == PICK_STATION_REQUEST) {
             Intent output = new Intent();
             output.putExtra("stationName", resultData.getStringExtra("stationName"));
+            output.putExtra("stationFullName", resultData.getStringExtra("stationFullName"));
             setResult(RESULT_OK, output);
             finish();
         }
