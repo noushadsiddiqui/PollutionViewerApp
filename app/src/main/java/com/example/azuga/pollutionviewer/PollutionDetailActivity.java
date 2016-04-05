@@ -77,46 +77,46 @@ public class PollutionDetailActivity extends AppCompatActivity {
         tbrow0.addView(tv2);*/
         stk.addView(tbrow0);
         if (spd.getpM25() != null) {
-            createRow("PM25", ApplicationUIUtils.roundUptoTwoDecimalUnits(spd.getpM25()));
+            createRow("PM25", ApplicationUIUtils.roundUptoTwoDecimalUnits(spd.getpM25())+ApplicationUIUtils.getPollutantUnits("PM25"));
         }
         if (spd.getpM10() != null) {
-            createRow("PM10", ApplicationUIUtils.roundUptoTwoDecimalUnits(spd.getpM10()));
+            createRow("PM10", ApplicationUIUtils.roundUptoTwoDecimalUnits(spd.getpM10())+ApplicationUIUtils.getPollutantUnits("PM10"));
         }
         if (spd.getNitrogenDioxide() != null) {
-            createRow("NitrogenDioxide", ApplicationUIUtils.roundUptoTwoDecimalUnits(spd.getNitrogenDioxide()));
+            createRow("NitrogenDioxide", ApplicationUIUtils.roundUptoTwoDecimalUnits(spd.getNitrogenDioxide())+ApplicationUIUtils.getPollutantUnits("NitrogenDioxide"));
         }
         if (spd.getOzone() != null) {
-            createRow("Ozone", ApplicationUIUtils.roundUptoTwoDecimalUnits(spd.getOzone()));
+            createRow("Ozone", ApplicationUIUtils.roundUptoTwoDecimalUnits(spd.getOzone())+ApplicationUIUtils.getPollutantUnits("Ozone"));
         }
         if (spd.getCarbonMonoxide() != null) {
-            createRow("CarbonMonoxide", ApplicationUIUtils.roundUptoTwoDecimalUnits(spd.getCarbonMonoxide()));
+            createRow("CarbonMonoxide", ApplicationUIUtils.roundUptoTwoDecimalUnits(spd.getCarbonMonoxide())+ApplicationUIUtils.getPollutantUnits("CarbonMonoxide"));
         }
         if (spd.getSulphurDioxide() != null) {
-            createRow("Sulphur Dioxide", ApplicationUIUtils.roundUptoTwoDecimalUnits(spd.getSulphurDioxide()));
+            createRow("Sulphur Dioxide", ApplicationUIUtils.roundUptoTwoDecimalUnits(spd.getSulphurDioxide())+ApplicationUIUtils.getPollutantUnits("Sulphur Dioxide"));
         }
         if (spd.getAmmonia() != null) {
-            createRow("Ammonia", ApplicationUIUtils.roundUptoTwoDecimalUnits(spd.getAmmonia()));
+            createRow("Ammonia", ApplicationUIUtils.roundUptoTwoDecimalUnits(spd.getAmmonia())+ApplicationUIUtils.getPollutantUnits("Ammonia"));
         }
         if (spd.getNitricOxide() != null) {
-            createRow("NitricOxide", ApplicationUIUtils.roundUptoTwoDecimalUnits(spd.getNitricOxide()));
+            createRow("NitricOxide", ApplicationUIUtils.roundUptoTwoDecimalUnits(spd.getNitricOxide())+ApplicationUIUtils.getPollutantUnits("NitricOxide"));
         }
         if (spd.getOxidesOfNitrogen() != null) {
-            createRow("oxidesOfNitrogen", ApplicationUIUtils.roundUptoTwoDecimalUnits(spd.getOxidesOfNitrogen()));
+            createRow("oxidesOfNitrogen", ApplicationUIUtils.roundUptoTwoDecimalUnits(spd.getOxidesOfNitrogen())+ApplicationUIUtils.getPollutantUnits("oxidesOfNitrogen"));
         }
         if (spd.getBenzene() != null) {
-            createRow("Benzene", ApplicationUIUtils.roundUptoTwoDecimalUnits(spd.getBenzene()));
+            createRow("Benzene", ApplicationUIUtils.roundUptoTwoDecimalUnits(spd.getBenzene())+ApplicationUIUtils.getPollutantUnits("Benzene"));
         }
         if (spd.getToulene() != null) {
-            createRow("Toulene", ApplicationUIUtils.roundUptoTwoDecimalUnits(spd.getToulene()));
+            createRow("Toulene", ApplicationUIUtils.roundUptoTwoDecimalUnits(spd.getToulene())+ApplicationUIUtils.getPollutantUnits("Toulene"));
         }
         if (spd.getEthylBenzene() != null) {
-            createRow("EthylBenzene", ApplicationUIUtils.roundUptoTwoDecimalUnits(spd.getEthylBenzene()));
+            createRow("EthylBenzene", ApplicationUIUtils.roundUptoTwoDecimalUnits(spd.getEthylBenzene())+ApplicationUIUtils.getPollutantUnits("EthylBenzene"));
         }
         if (spd.getNonMethaneHydrocarbon() != null) {
-            createRow("nonMethaneHydrocarbon", ApplicationUIUtils.roundUptoTwoDecimalUnits(spd.getNonMethaneHydrocarbon()));
+            createRow("nonMethaneHydrocarbon", ApplicationUIUtils.roundUptoTwoDecimalUnits(spd.getNonMethaneHydrocarbon())+ApplicationUIUtils.getPollutantUnits("nonMethaneHydrocarbon"));
         }
         if (spd.getPXylene() != null) {
-            createRow("Pxylene", ApplicationUIUtils.roundUptoTwoDecimalUnits(spd.getPXylene()));
+            createRow("Pxylene", ApplicationUIUtils.roundUptoTwoDecimalUnits(spd.getPXylene())+ApplicationUIUtils.getPollutantUnits("Pxylene"));
         }
     }
 

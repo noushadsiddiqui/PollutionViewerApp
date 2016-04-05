@@ -73,7 +73,7 @@ public class DisplayStatesOptionsActivity extends BaseActivity {
             @Override
             public void onResponse(Response<ArrayList<AllStation>> response) {
                 hideProgressDialog();
-                if (response.isSuccess()) {
+                if (response.isSuccess() && response != null) {
                     Log.i(TAG, "Response is not null");
                     listDataHeader = new ArrayList<>();
                     listDataChild = new HashMap<>();

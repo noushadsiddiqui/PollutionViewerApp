@@ -59,7 +59,10 @@ public class SessionManager {
         editor.commit();
     }
 
-    public void setSessionStateList(HashSet<String> stations) {
+    public void setSessionStateList(HashSet<String> stations, String token) {
+        editor.clear();
+        // Storing token in pref
+        editor.putString(TOKEN, token);
         // Storing station name in pref
         editor.putStringSet(STATION_LIST, stations);
         // commit changes
@@ -76,6 +79,7 @@ public class SessionManager {
     public String getToken() {
         return pref.getString(TOKEN, "");
     }
+
     /**
      * Check login method wil check user login status
      * If false it will redirect user to login page

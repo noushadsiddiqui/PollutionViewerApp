@@ -248,4 +248,13 @@ public class ApplicationUIUtils {
             return ContextCompat.getColor(context, R.color.colorBrown);
         }
     }
+
+    public static String getPollutantUnits(String name) {
+        if (name.equals("CarbonMonoxide")) {
+            return " mg/m3";
+        } else {
+            return " µg/m3";
+        }
+
+    }
 }

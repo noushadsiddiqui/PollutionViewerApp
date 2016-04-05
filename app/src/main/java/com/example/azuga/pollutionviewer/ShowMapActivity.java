@@ -35,8 +35,11 @@ public class ShowMapActivity extends AppCompatActivity {
         }
         Intent intent = getIntent();
         StationPollutionDetail spd = intent.getParcelableExtra("pollutionDetailList");
-        createBarChart(spd);
-
+        if (spd != null) {
+            createBarChart(spd);
+        } else {
+            finish();
+        }
     }
 
     @Override

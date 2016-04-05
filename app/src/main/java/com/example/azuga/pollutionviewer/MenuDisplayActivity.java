@@ -58,7 +58,6 @@ public class MenuDisplayActivity extends BaseActivity
     Location mLocation;
     LocationManager locManager = null;
     Double mLatitude, mLongitude;
-    private HashSet<String> selectedStations;
     private HashMap<String, StationPollutionDetail> stationPollutionDetailHashMap = new HashMap<>();
     private GoogleApiClient mGoogleApiClient;
     private RecyclerView mRecyclerView;
@@ -68,6 +67,8 @@ public class MenuDisplayActivity extends BaseActivity
     private AddressResultReceiver mResultReceiver;
     private AllStation nearestStation;
     private TokenResponse token_response;
+    private HashSet<String> selectedStations;
+    private String token;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,7 +77,6 @@ public class MenuDisplayActivity extends BaseActivity
         setContentView(R.layout.activity_menu_display);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -120,7 +120,9 @@ public class MenuDisplayActivity extends BaseActivity
                                     DataObject d = results.get(position);
                                     results.remove(position);
                                     mAdapter.notifyItemRemoved(position);
-                                    session.getStationsList().remove(d.getmText1());
+                                    selectedStations = session.getStationsList();
+                                    selectedStations.remove(d.getmText1());
+                                    session.setSessionStateList(selectedStations, token);
                                 }
                                 mAdapter.notifyDataSetChanged();
                             }
@@ -131,7 +133,9 @@ public class MenuDisplayActivity extends BaseActivity
                                     DataObject d = results.get(position);
                                     results.remove(position);
                                     mAdapter.notifyItemRemoved(position);
-                                    session.getStationsList().remove(d.getmText1());
+                                    selectedStations = session.getStationsList();
+                                    selectedStations.remove(d.getmText1());
+                                    session.setSessionStateList(selectedStations, token);
                                 }
                                 mAdapter.notifyDataSetChanged();
                             }
@@ -219,9 +223,6 @@ public class MenuDisplayActivity extends BaseActivity
         if (mGoogleApiClient != null) {
             mGoogleApiClient.disconnect();
         }
-        if (selectedStations != null) {
-            session.setSessionStateList(selectedStations);
-        }
     }
 
     @Override
@@ -234,8 +235,7 @@ public class MenuDisplayActivity extends BaseActivity
             try {
                 token_response = new GetUserToken().execute(tokenResponse).get();
                 if (token_response != null && token_response.isSuccess()) {
-                    String token = token_response.getToken();
-                    Log.i(TAG, "token is " + token);
+                    token = token_response.getToken();
                     session.setSessionToken(token);
                 }
                 //TODO: check for refresh token
@@ -277,7 +277,6 @@ public class MenuDisplayActivity extends BaseActivity
                         e.printStackTrace();
                     }
                     if (session.getStationsList() != null && !session.getStationsList().isEmpty() && !session.getToken().isEmpty()) {
-                        Log.i(TAG, "Token is" + session.getToken());
                         Set<String> user_station = session.getStationsList();
                         Iterator<String> itr = user_station.iterator();
                         while (itr.hasNext()) {
@@ -359,6 +358,7 @@ public class MenuDisplayActivity extends BaseActivity
             mAdapter.notifyDataSetChanged();
             selectedStations = session.getStationsList();
             selectedStations.add(stationName);
+            session.setSessionStateList(selectedStations, token);
         }
     }
 
@@ -403,9 +403,6 @@ public class MenuDisplayActivity extends BaseActivity
         if (mResultReceiver != null) {
             mResultReceiver.setReceiver(null);
         }
-        if (selectedStations != null) {
-            session.setSessionStateList(selectedStations);
-        }
     }
 
     @Override
@@ -413,9 +410,6 @@ public class MenuDisplayActivity extends BaseActivity
         super.onDestroy();
         if (mResultReceiver != null) {
             mResultReceiver.setReceiver(null);
-        }
-        if (selectedStations != null) {
-            session.setSessionStateList(selectedStations);
         }
         mGoogleApiClient.disconnect();
     }
@@ -453,7 +447,7 @@ public class MenuDisplayActivity extends BaseActivity
             //get backGround Color of card according to AQI value
             int color = ApplicationUIUtils.getCardBackgroundColor(MenuDisplayActivity.this, pollutionData.getAqi());
             String text3 = ApplicationUIUtils.getPollutionStatus(MenuDisplayActivity.this, pollutionData.getAqi());
-            d = new DataObject(firstCard ? "Your Nearest Area is : " + stationFullName : stationName, text2, text3, color);
+            d = new DataObject(firstCard ? "Your Nearest Pollution Station is : " + stationFullName : stationName, text2, text3, color);
         } else {
             d = new DataObject(stationName, "", "", ContextCompat.getColor(MenuDisplayActivity.this, R.color.blue));
         }
