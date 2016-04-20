@@ -66,14 +66,14 @@ public class SessionManager {
         // Storing station name in pref
         editor.putStringSet(STATION_LIST, stations);
         // commit changes
-        editor.commit();
+        editor.apply();
     }
 
     public void setSessionToken(String token) {
         // Storing token in pref
         editor.putString(TOKEN, token);
         // commit changes
-        editor.commit();
+        editor.apply();
     }
 
     public String getToken() {

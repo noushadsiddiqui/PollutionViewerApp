@@ -14,6 +14,7 @@ import com.example.azuga.pollutionviewer.adapter.ExpandableListAdapter;
 import com.example.azuga.pollutionviewer.utils.ApplicationUIUtils;
 import com.example.azuga.pollutionviewer.utils.SessionManager;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -72,8 +73,8 @@ public class DisplayStatesOptionsActivity extends BaseActivity {
         call.enqueue(new Callback<ArrayList<AllStation>>() {
             @Override
             public void onResponse(Response<ArrayList<AllStation>> response) {
-                hideProgressDialog();
-                if (response.isSuccess() && response != null) {
+                if (response.isSuccess() && !response.body().isEmpty()) {
+                    hideProgressDialog();
                     Log.i(TAG, "Response is not null");
                     listDataHeader = new ArrayList<>();
                     listDataChild = new HashMap<>();
@@ -109,6 +110,12 @@ public class DisplayStatesOptionsActivity extends BaseActivity {
                         }
                     }
                     setUpStateList(listDataHeader, listDataChild, listStationChild);
+                }else{
+                    try {
+                        Log.i(TAG, "error is :"+response.errorBody().string());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
 

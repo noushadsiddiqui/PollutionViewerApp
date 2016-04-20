@@ -53,10 +53,10 @@ public class ShowMapActivity extends AppCompatActivity {
 
     private void createBarChart(StationPollutionDetail spd) {
         int hour = 0;
-        String[] mLabel = new String[8];
+        //String[] mLabel = new String[8];
         if (spd.getPm10AQI() != null) {
             XYSeries series = new XYSeries("PM10 AQI");
-            mLabel[hour] = "PM10";
+            //mLabel[hour] = "PM10";
             series.add(hour++, ApplicationUIUtils.roundedAQI(spd.getPm10AQI()));
             mDataset.addSeries(series);
             XYSeriesRenderer renderer = new XYSeriesRenderer();
@@ -69,7 +69,7 @@ public class ShowMapActivity extends AppCompatActivity {
         }
         if (spd.getPm25AQI() != null) {
             XYSeries series = new XYSeries("PM25 AQI");
-            mLabel[hour] = "PM25";
+            //mLabel[hour] = "PM25";
             series.add(hour++, ApplicationUIUtils.roundedAQI(spd.getPm25AQI()));
             mDataset.addSeries(series);
             XYSeriesRenderer renderer = new XYSeriesRenderer();
@@ -82,7 +82,7 @@ public class ShowMapActivity extends AppCompatActivity {
         }
         if (spd.getNitrogenDioxideAQI() != null) {
             XYSeries series = new XYSeries("NitrogenDioxide AQI");
-            mLabel[hour] = "NO2";
+            //mLabel[hour] = "NO2";
             series.add(hour++, ApplicationUIUtils.roundedAQI(spd.getNitrogenDioxideAQI()));
             mDataset.addSeries(series);
             XYSeriesRenderer renderer = new XYSeriesRenderer();
@@ -95,7 +95,7 @@ public class ShowMapActivity extends AppCompatActivity {
         }
         if (spd.getOzoneAQI() != null) {
             XYSeries series = new XYSeries("Ozone AQI");
-            mLabel[hour] = "03";
+            //mLabel[hour] = "03";
             series.add(hour++, ApplicationUIUtils.roundedAQI(spd.getOzoneAQI()));
             mDataset.addSeries(series);
             XYSeriesRenderer renderer = new XYSeriesRenderer();
@@ -108,7 +108,7 @@ public class ShowMapActivity extends AppCompatActivity {
         }
         if (spd.getCarbonMonoxideAQI() != null) {
             XYSeries series = new XYSeries("CarbonMonoxide AQI");
-            mLabel[hour] = "CO";
+            //mLabel[hour] = "CO";
             series.add(hour++, ApplicationUIUtils.roundedAQI(spd.getCarbonMonoxideAQI()));
             mDataset.addSeries(series);
             XYSeriesRenderer renderer = new XYSeriesRenderer();
@@ -122,7 +122,7 @@ public class ShowMapActivity extends AppCompatActivity {
         }
         if (spd.getSulfurDioxideAQI() != null) {
             XYSeries series = new XYSeries("SulfurDioxide AQI");
-            mLabel[hour] = "SO2";
+            //mLabel[hour] = "SO2";
             series.add(hour++, ApplicationUIUtils.roundedAQI(spd.getSulfurDioxideAQI()));
             mDataset.addSeries(series);
             XYSeriesRenderer renderer = new XYSeriesRenderer();
@@ -135,7 +135,7 @@ public class ShowMapActivity extends AppCompatActivity {
         }
         if (spd.getAmmoniaAQI() != null) {
             XYSeries series = new XYSeries("Ammonia AQI");
-            mLabel[hour] = "NH3";
+            //mLabel[hour] = "NH3";
             series.add(hour++, ApplicationUIUtils.roundedAQI(spd.getAmmoniaAQI()));
             mDataset.addSeries(series);
             XYSeriesRenderer renderer = new XYSeriesRenderer();

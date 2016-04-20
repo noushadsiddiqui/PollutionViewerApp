@@ -52,6 +52,9 @@
         <service
             android:name=".FetchAddressIntentService"
             android:exported="false" />
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="75d31077fa71056e7431eddf86739fb6e002b9c2" />
     </application>
 
 </manifest>

@@ -7,6 +7,7 @@ import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 
 import com.example.azuga.pollutionviewer.R;
 
@@ -31,6 +32,7 @@ public class ApplicationUIUtils {
         try {
             gps_enabled = locManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
         } catch (Exception ex) {
+            Log.i("GPSStatus", " checking GPSStatus throws error " + ex);
         }
         return gps_enabled;
     }
@@ -41,6 +43,7 @@ public class ApplicationUIUtils {
         try {
             ntw_enabled = locManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
         } catch (Exception ex) {
+            Log.i("NetworkStatus", "checking NetworkStatus throws error " + ex);
         }
         return ntw_enabled;
     }

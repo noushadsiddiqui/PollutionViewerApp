@@ -28,7 +28,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.example.azuga.pollutionviewer.adapter.AddressResultReceiver;
+import com.crashlytics.android.Crashlytics;
 import com.example.azuga.pollutionviewer.adapter.MyRecyclerViewAdapter;
 import com.example.azuga.pollutionviewer.utils.ApplicationUIUtils;
 import com.example.azuga.pollutionviewer.utils.DataObject;
@@ -45,7 +45,10 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
+import io.fabric.sdk.android.Fabric;
 import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MenuDisplayActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener/*, AddressResultReceiver.Receiver*/ {
@@ -64,7 +67,6 @@ public class MenuDisplayActivity extends BaseActivity
     private MyRecyclerViewAdapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
     private SessionManager session;
-    private AddressResultReceiver mResultReceiver;
     private AllStation nearestStation;
     private TokenResponse token_response;
     private HashSet<String> selectedStations;
@@ -73,6 +75,7 @@ public class MenuDisplayActivity extends BaseActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Fabric.with(this, new Crashlytics());
         session = new SessionManager(this);
         setContentView(R.layout.activity_menu_display);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -95,12 +98,12 @@ public class MenuDisplayActivity extends BaseActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         locManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        if (ApplicationUIUtils.isNetworkAvailable(this)) {
+        if (ApplicationUIUtils.isNetworkAvailable(this) && ApplicationUIUtils.displayNetworkStatus(locManager)) {
             showProgressBar(this, "Downloading Content.....");
             setRecyclerView();
             buildGoogleApiClient(this);
         } else {
-            ApplicationUIUtils.showAlertDialog(this, "Internet Connection Error", "Sorry Not connected to Internet", false);
+            ApplicationUIUtils.showAlertDialog(this, "Internet Connection Error", "Please connect to Internet and Retry", false);
         }
     }
 
@@ -109,6 +112,13 @@ public class MenuDisplayActivity extends BaseActivity
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setHasFixedSize(false);
+        Iterator<String> itr = session.getStationsList().iterator();
+        DataObject d1 = new DataObject("Your Nearest Pollution Station is : ", "", "", ContextCompat.getColor(this, R.color.blue));
+        results.add(d1);
+        while (itr.hasNext()) {
+            DataObject d = new DataObject(itr.next(), "", "", ContextCompat.getColor(this, R.color.blue));
+            results.add(d);
+        }
         mAdapter = new MyRecyclerViewAdapter(results);
         mRecyclerView.setAdapter(mAdapter);
         SwipeableRecyclerViewTouchListener swipeTouchListener =
@@ -122,7 +132,7 @@ public class MenuDisplayActivity extends BaseActivity
                                     mAdapter.notifyItemRemoved(position);
                                     selectedStations = session.getStationsList();
                                     selectedStations.remove(d.getmText1());
-                                    session.setSessionStateList(selectedStations, token);
+                                    session.setSessionStateList(selectedStations, session.getToken());
                                 }
                                 mAdapter.notifyDataSetChanged();
                             }
@@ -135,20 +145,17 @@ public class MenuDisplayActivity extends BaseActivity
                                     mAdapter.notifyItemRemoved(position);
                                     selectedStations = session.getStationsList();
                                     selectedStations.remove(d.getmText1());
-                                    session.setSessionStateList(selectedStations, token);
+                                    session.setSessionStateList(selectedStations, session.getToken());
                                 }
                                 mAdapter.notifyDataSetChanged();
                             }
 
                             @Override
                             public boolean canSwipe(int position) {
-                                if (position == 0) {
-                                    return false;
-                                }
-                                return true;
+                                return position != 0;
                             }
                         });
-
+        results.clear();
         mRecyclerView.addOnItemTouchListener(swipeTouchListener);
     }
 
@@ -236,7 +243,9 @@ public class MenuDisplayActivity extends BaseActivity
                 token_response = new GetUserToken().execute(tokenResponse).get();
                 if (token_response != null && token_response.isSuccess()) {
                     token = token_response.getToken();
-                    session.setSessionToken(token);
+                    if (token != null && !token.isEmpty()) {
+                        session.setSessionToken(token);
+                    }
                 }
                 //TODO: check for refresh token
             } catch (InterruptedException | ExecutionException e) {
@@ -263,29 +272,38 @@ public class MenuDisplayActivity extends BaseActivity
                 startService(intent);
             }*/
                 //calling API to get nearest station area
-                if (mLatitude != null && mLongitude != null) {
-                    APIService apiService = APIHelper.getApiService();
-                    Call<AllStation> nearestStationCall = apiService.findNearestStation(mLatitude, mLongitude);
-                    try {
-                        nearestStation = new GetNearestStation().execute(nearestStationCall).get();
-                        if (nearestStation != null && !session.getToken().isEmpty()) {
-                            callForPollutionData(nearestStation.getStationName(), nearestStation.getFullStationName(), true);
-                        } else {
-                            callForPollutionData("Sorry No Nearest Area Found", "", true);
-                        }
-                    } catch (InterruptedException | ExecutionException e) {
-                        e.printStackTrace();
-                    }
-                    if (session.getStationsList() != null && !session.getStationsList().isEmpty() && !session.getToken().isEmpty()) {
-                        Set<String> user_station = session.getStationsList();
-                        Iterator<String> itr = user_station.iterator();
-                        while (itr.hasNext()) {
-                            String stationName = itr.next();
-                            callForPollutionData(stationName, "", false);
+                showProgressBar(this, "");
+                APIService apiService = APIHelper.getApiService();
+                Call<AllStation> nearestStationCall = apiService.findNearestStation(mLatitude, mLongitude);
+                nearestStationCall.enqueue(new Callback<AllStation>() {
+                    @Override
+                    public void onResponse(Response<AllStation> response) {
+                        if (response.isSuccess()) {
+                            hideProgressDialog();
+                            nearestStation = response.body();
+                            if (nearestStation != null && !session.getToken().isEmpty()) {
+                                callForPollutionData(nearestStation.getStationName(), nearestStation.getFullStationName(), true);
+                            } else {
+                                callForPollutionData("Sorry No Nearest Area Found", "", true);
+                            }
                         }
                     }
-                    hideProgressDialog();
+
+                    @Override
+                    public void onFailure(Throwable t) {
+                        ApplicationUIUtils.showAlertDialog(MenuDisplayActivity.this, "Error", "A Problem has occured! Please retry", false);
+                    }
+                });
+                if (session.getStationsList() != null && !session.getStationsList().isEmpty() && !session.getToken().isEmpty()) {
+                    Log.i(TAG, "Token is" + session.getToken());
+                    Set<String> user_station = session.getStationsList();
+                    Iterator<String> itr = user_station.iterator();
+                    while (itr.hasNext()) {
+                        String stationName = itr.next();
+                        callForPollutionData(stationName, "", false);
+                    }
                 }
+                hideProgressDialog();
             }
         }
     }
@@ -309,7 +327,6 @@ public class MenuDisplayActivity extends BaseActivity
                     REQUEST_CODE_ASK_PERMISSIONS);
             return;
         }
-        //createFirstCard();
     }
 
     private void showMessageOKCancel(String message, DialogInterface.OnClickListener okListener) {
@@ -358,7 +375,7 @@ public class MenuDisplayActivity extends BaseActivity
             mAdapter.notifyDataSetChanged();
             selectedStations = session.getStationsList();
             selectedStations.add(stationName);
-            session.setSessionStateList(selectedStations, token);
+            session.setSessionStateList(selectedStations, session.getToken());
         }
     }
 
@@ -369,8 +386,6 @@ public class MenuDisplayActivity extends BaseActivity
             if (ApplicationUIUtils.isNetworkAvailable(this)) {
                 buildGoogleApiClient(MenuDisplayActivity.this);
                 mGoogleApiClient.connect();
-            } else {
-                ApplicationUIUtils.showAlertDialog(this, "Internet Connection Error", "Sorry Not connected to Internet", false);
             }
         }
        /* if (mResultReceiver != null) {
@@ -399,19 +414,17 @@ public class MenuDisplayActivity extends BaseActivity
     @Override
     protected void onPause() {
         super.onPause();
-        mGoogleApiClient.disconnect();
-        if (mResultReceiver != null) {
-            mResultReceiver.setReceiver(null);
+        if (mGoogleApiClient != null) {
+            mGoogleApiClient.disconnect();
         }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mResultReceiver != null) {
-            mResultReceiver.setReceiver(null);
+        if (mGoogleApiClient != null) {
+            mGoogleApiClient.disconnect();
         }
-        mGoogleApiClient.disconnect();
     }
 
     /*@Override
@@ -429,29 +442,46 @@ public class MenuDisplayActivity extends BaseActivity
         mAdapter.notifyDataSetChanged();
     }*/
 
-    private void callForPollutionData(String stationName, String stationFullName, boolean firstCard) {
-        DataObject d;
+    private void callForPollutionData(final String stationName, final String stationFullName, final boolean firstCard) {
         if (!stationName.equals("Sorry No Nearest Area Found")) {
+            showProgressBar(this, "");
             APIService apiService = APIHelper.getApiService();
             Call<StationPollutionDetail> call = apiService.loadAllDetail(stationName, session.getToken());
-            try {
-                pollutionData = new DownloadPollutionData().execute(call).get();
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-            }
-            if (!stationPollutionDetailHashMap.containsKey(stationName)) {
-                stationPollutionDetailHashMap.put(stationName, pollutionData);
-            }
-            String aqi = String.valueOf(ApplicationUIUtils.roundedAQI(pollutionData.getAqi()));
-            String text2 = "AQI : " + aqi;
-            //get backGround Color of card according to AQI value
-            int color = ApplicationUIUtils.getCardBackgroundColor(MenuDisplayActivity.this, pollutionData.getAqi());
-            String text3 = ApplicationUIUtils.getPollutionStatus(MenuDisplayActivity.this, pollutionData.getAqi());
-            d = new DataObject(firstCard ? "Your Nearest Pollution Station is : " + stationFullName : stationName, text2, text3, color);
+            call.enqueue(new Callback<StationPollutionDetail>() {
+                @Override
+                public void onResponse(Response<StationPollutionDetail> response) {
+                    if (response.isSuccess()) {
+                        hideProgressDialog();
+                        pollutionData = response.body();
+                        if (!stationPollutionDetailHashMap.containsKey(stationName)) {
+                            stationPollutionDetailHashMap.put(stationName, pollutionData);
+                        }
+                        String aqi = String.valueOf(ApplicationUIUtils.roundedAQI(pollutionData.getAqi()));
+                        String text2 = "AQI : " + aqi;
+                        //get backGround Color of card according to AQI value
+                        int color = ApplicationUIUtils.getCardBackgroundColor(MenuDisplayActivity.this, pollutionData.getAqi());
+                        String text3 = ApplicationUIUtils.getPollutionStatus(MenuDisplayActivity.this, pollutionData.getAqi());
+                        DataObject d = new DataObject(firstCard ? "Your Nearest Pollution Station is : " + stationFullName : stationName, text2, text3, color);
+                        if (firstCard) {
+                            mAdapter.addItem(d, 0);
+                            mAdapter.notifyDataSetChanged();
+                        } else {
+                            int count = mAdapter.getItemCount();
+                            mAdapter.addItem(d, count);
+                            mAdapter.notifyItemChanged(count);
+                        }
+                    }
+                }
+
+                @Override
+                public void onFailure(Throwable t) {
+                    ApplicationUIUtils.showAlertDialog(MenuDisplayActivity.this, "Error", "A Problem has occured! Please retry", false);
+                }
+            });
         } else {
-            d = new DataObject(stationName, "", "", ContextCompat.getColor(MenuDisplayActivity.this, R.color.blue));
+            DataObject d = new DataObject(stationName, "", "", ContextCompat.getColor(MenuDisplayActivity.this, R.color.blue));
+            results.add(d);
+            mAdapter.notifyDataSetChanged();
         }
-        results.add(d);
-        mAdapter.notifyDataSetChanged();
     }
 }
