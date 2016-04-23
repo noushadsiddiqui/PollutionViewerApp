@@ -1,4 +1,4 @@
-package com.example.azuga.pollutionviewer;
+package com.codeGeekerz.project.pollutionTracker;
 
 import org.junit.Test;
 
