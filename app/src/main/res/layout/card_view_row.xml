@@ -34,8 +34,7 @@
                 android:layout_below="@+id/station_heading"
                 android:layout_marginTop="10dp"
                 android:paddingLeft="4dp"
-                android:paddingRight="4dp"
-                android:background="@color/black" />
+                android:paddingRight="4dp" />
 
             <TextView
                 android:id="@+id/AQI_value"

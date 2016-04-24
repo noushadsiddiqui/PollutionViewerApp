@@ -277,9 +277,10 @@ public class MenuDisplayActivity extends BaseActivity
         } else {
             mLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             if (mLocation != null) {
-                handleNewLocation(mLocation);
+                handleNewLocation(mLocation, false);
             } else {
                 LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+                callForPollutionData("Sorry No Nearest Area Found", "", true, false);
             }
             if (session.getStationsList() != null && !session.getStationsList().isEmpty() && !session.getToken().isEmpty()) {
                 Log.i(TAG, "Token is" + session.getToken());
@@ -287,14 +288,14 @@ public class MenuDisplayActivity extends BaseActivity
                 Iterator<String> itr = user_station.iterator();
                 while (itr.hasNext()) {
                     String stationName = itr.next();
-                    callForPollutionData(stationName, "", false);
+                    callForPollutionData(stationName, "", false, false);
                 }
             }
             hideProgressDialog();
         }
     }
 
-    private void handleNewLocation(Location mLocation) {
+    private void handleNewLocation(Location mLocation, final boolean isFromLocationUpdate) {
         mLatitude = mLocation.getLatitude();
         mLongitude = mLocation.getLongitude();
             /*if (mGoogleApiClient.isConnected() && mLocation != null) {
@@ -314,9 +315,9 @@ public class MenuDisplayActivity extends BaseActivity
                 if (response.isSuccess()) {
                     nearestStation = response.body();
                     if (nearestStation != null && !session.getToken().isEmpty()) {
-                        callForPollutionData(nearestStation.getStationName(), nearestStation.getFullStationName(), true);
+                        callForPollutionData(nearestStation.getStationName(), nearestStation.getFullStationName(), true, isFromLocationUpdate);
                     } else {
-                        callForPollutionData("Sorry No Nearest Area Found", "", true);
+                        callForPollutionData("Sorry No Nearest Area Found", "", true, isFromLocationUpdate);
                     }
                 }
             }
@@ -400,7 +401,7 @@ public class MenuDisplayActivity extends BaseActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent resultData) {
         if (resultCode == Activity.RESULT_OK && requestCode == PICK_STATION_REQUEST) {
             String stationName = resultData.getStringExtra("stationName");
-            callForPollutionData(stationName, "", false);
+            callForPollutionData(stationName, "", false, false);
             mAdapter.notifyDataSetChanged();
             selectedStations = session.getStationsList();
             selectedStations.add(stationName);
@@ -469,7 +470,7 @@ public class MenuDisplayActivity extends BaseActivity
         mAdapter.notifyDataSetChanged();
     }*/
 
-    private void callForPollutionData(final String stationName, final String stationFullName, final boolean firstCard) {
+    private void callForPollutionData(final String stationName, final String stationFullName, final boolean firstCard, final boolean isFromLocationUpdate) {
         if (!stationName.equals("Sorry No Nearest Area Found")) {
             APIService apiService = APIHelper.getApiService();
             Call<StationPollutionDetail> call = apiService.loadAllDetail(stationName, session.getToken());
@@ -489,6 +490,9 @@ public class MenuDisplayActivity extends BaseActivity
                         DataObject d = new DataObject(firstCard ? "Your Nearest Pollution Station is : " + stationFullName : stationName, text2, text3, color);
                         if (firstCard) {
                             mAdapter.addItem(d, 0);
+                            if (isFromLocationUpdate) {
+                                mAdapter.notifyItemChanged(0);
+                            }
                             mAdapter.notifyDataSetChanged();
                         } else {
                             int count = mAdapter.getItemCount();
@@ -505,13 +509,13 @@ public class MenuDisplayActivity extends BaseActivity
             });
         } else {
             DataObject d = new DataObject(stationName, "", "", ContextCompat.getColor(MenuDisplayActivity.this, R.color.blue));
-            results.add(d);
-            mAdapter.notifyDataSetChanged();
+            mAdapter.addItem(d, 0);
+            mAdapter.notifyItemChanged(0);
         }
     }
 
     @Override
     public void onLocationChanged(Location location) {
-        handleNewLocation(location);
+        handleNewLocation(location, true);
     }
 }

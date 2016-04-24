@@ -37,7 +37,7 @@
             android:theme="@style/AppTheme" />
         <activity
             android:name="com.codeGeekerz.project.pollutionTracker.StationDisplayActivity"
-            android:label="Choose Your Station"
+            android:label="Choose Your Nearest Station"
             android:theme="@style/AppTheme" />
         <activity
             android:name="com.codeGeekerz.project.pollutionTracker.PollutionDetailActivity"

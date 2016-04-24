@@ -1,5 +1,6 @@
 package com.codeGeekerz.project.pollutionTracker.adapter;
 
+import android.graphics.Color;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -47,15 +48,18 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
         holder.dateTime.setText(mDataset.get(position).getmText2());
         holder.dateTime.setTextSize(25);
         holder.card.setCardBackgroundColor(mDataset.get(position).getmColor());
-        holder.pollutionBoard.setText(mDataset.get(position).getmText3());
-        holder.pollutionBoard.setTextSize(15);
-        holder.pollutionBoard.setTextColor(mDataset.get(position).getmColor());
-        Animation anim = new AlphaAnimation(0.0f, 1.0f);
-        anim.setDuration(1000); //You can manage the time of the blink with this parameter
-        anim.setStartOffset(20);
-        anim.setRepeatMode(Animation.REVERSE);
-        anim.setRepeatCount(Animation.INFINITE);
-        holder.pollutionBoard.startAnimation(anim);
+        if (!mDataset.get(position).getmText3().isEmpty()) {
+            holder.pollutionBoard.setText(mDataset.get(position).getmText3());
+            holder.pollutionBoard.setTextSize(15);
+            holder.pollutionBoard.setBackgroundColor(Color.BLACK);
+            holder.pollutionBoard.setTextColor(mDataset.get(position).getmColor());
+            Animation anim = new AlphaAnimation(0.0f, 1.0f);
+            anim.setDuration(1000); //You can manage the time of the blink with this parameter
+            anim.setStartOffset(20);
+            anim.setRepeatMode(Animation.REVERSE);
+            anim.setRepeatCount(Animation.INFINITE);
+            holder.pollutionBoard.startAnimation(anim);
+        }
     }
 
     public void addItem(DataObject dataObj, int index) {
