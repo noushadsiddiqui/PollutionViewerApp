@@ -185,7 +185,7 @@ public class MenuDisplayActivity extends BaseActivity
 
                             @Override
                             public boolean canSwipe(int position) {
-                                return true;
+                                return position != 0;
                             }
                         });
         results.clear();
@@ -279,6 +279,9 @@ public class MenuDisplayActivity extends BaseActivity
             if (mLocation != null) {
                 handleNewLocation(mLocation, false);
             } else {
+                if (!mGoogleApiClient.isConnected()) {
+                    mGoogleApiClient.connect();
+                }
                 LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
                 callForPollutionData("Sorry No Nearest Area Found", "", true, false);
             }
@@ -427,7 +430,9 @@ public class MenuDisplayActivity extends BaseActivity
                     if (position != 0) {
                         stationName = results.get(position).getmText1();
                     } else {
-                        stationName = nearestStation.getStationName();
+                        if (nearestStation != null) {
+                            stationName = nearestStation.getStationName();
+                        }
                     }
                     Intent intent = new Intent(MenuDisplayActivity.this, PollutionDetailActivity.class);
                     intent.putExtra("pollutionDetail", stationPollutionDetailHashMap.get(stationName));
@@ -477,7 +482,7 @@ public class MenuDisplayActivity extends BaseActivity
             call.enqueue(new Callback<StationPollutionDetail>() {
                 @Override
                 public void onResponse(Response<StationPollutionDetail> response) {
-                    if (response.isSuccess()) {
+                    if (response.isSuccess() && response != null) {
                         pollutionData = response.body();
                         if (!stationPollutionDetailHashMap.containsKey(stationName)) {
                             stationPollutionDetailHashMap.put(stationName, pollutionData);
